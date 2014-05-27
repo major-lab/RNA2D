@@ -30,15 +30,17 @@ immutable structure
   base_pair_set::Vector{(Int,Int)}#base pair set (sorted) of the dot bracket
   energy::FloatingPoint           #energy of the structure
   id                              #id of the sequence the structure belongs to
+  seq                             #sequence of the structure
 
   function structure{T <: String}(dotBracket::T;
                                   energy = -Inf,
-                                  id = None)
+                                  id = None,
+                                  seq=None)
     @assert testDotBracket(dotBracket) == true
     dotBracket = convert(String, dotBracket)
     mountain = dotBracketToMountain(dotBracket)
     base_pair_set = dotBracketToBPSet(dotBracket)
-    new(dotBracket, mountain, base_pair_set, energy, id)
+    new(dotBracket, mountain, base_pair_set, energy, id, seq)
   end
 end
 
@@ -103,6 +105,14 @@ function dotBracketToBPSet(dotBracket::String)
   return sort(bpset)
 end
 
+
+
+function sequenceDotBracketToBPSeq{S<:String}(dotBracket::S, sequence::S)
+  #Vienna dotbracket 
+  @a
+
+
+end
 
 
 
@@ -298,21 +308,29 @@ function RNAshapes(structure::String)
 end
 
 
-function lvl5Annotated{T<:String}(structure::T)
-  #annotate the lvl 5 abstract shape to add length of stem
+function shapeLvl5Annotated{T<:String}(structure::T)
+  #annotate the lvl 5 abstract shape
+  #2 annotations
+  #(first opening, last closing, number of base pairs)
+  #(first opening, last closing, (range opening, range closing))
   @assert testDotBracket(structure) == true
 
   stems = getStems(structure)
-  #println(stems)
+  println(stems)
   pairs1 = (Int, Int,Int)[]         #3rd field number of base pairs
   pairs2 = (Int, Int, (Int, Int))[] #3rd field is (range_open, range_close)
   for stem in stems
     push!(pairs1, (minimum(stem[1]), maximum(stem[2]), length(stem[3])))
     push!(pairs2, (minimum(stem[1]), maximum(stem[2]),(maximum(stem[1])- minimum(stem[1]), maximum(stem[2])-minimum(stem[2]))))
   end
-  sort!(pairs1)
-  sort!(pairs2)
-  (pairs1, pairs2)
+
+  lvl5 = (Int, String)[]
+  for stem in pairs1
+    push!(lvl5, (stem[1], "["))
+    push!(lvl5, (stem[2], "]"))
+  end
+  sort!(lvl5)
+  (sort(pairs1), sort(pairs2), join(map(x->x[2], lvl5)))
 end
 
 
