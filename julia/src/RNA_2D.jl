@@ -109,7 +109,7 @@ end
 
 function sequenceDotBracketToBPSeq{S<:String}(dotBracket::S, sequence::S)
   #Vienna dotbracket 
-  @a
+  #@assert 
 
 
 end
