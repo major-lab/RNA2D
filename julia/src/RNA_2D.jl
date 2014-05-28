@@ -369,7 +369,7 @@ function shapeLvl5Annotated{T<:String}(dotBracket::T)
   lvl5 = (Int, String)[]
   for stem in pairs1
     push!(lvl5, (stem[1], "["))
-    push!(lvl5, (stem[2], "]"))
+    push!(lvl5, (stem[2], "]$(stem[3])"))
   end
   sort!(lvl5)
   (sort(pairs1), sort(pairs2), join(map(x->x[2], lvl5)))
