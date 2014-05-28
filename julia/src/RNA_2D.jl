@@ -165,7 +165,7 @@ function levenshteinDistance{T<:String}(s::T, t::T)
   #(in our case, two vienna dot bracket secondary structures)
   m = length(s)
   n = length(t)
-  d = zeros(m+1,n+1)
+  const d = zeros(m+1,n+1)
   for i = 1:m+1
     d[i, 1] = i-1
   end
@@ -184,7 +184,7 @@ function levenshteinDistance{T<:String}(s::T, t::T)
       end
     end
   end
-  return d[m,n]
+  return d[m+1,n+1]
 end
 
 
