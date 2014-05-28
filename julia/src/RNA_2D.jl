@@ -3,7 +3,7 @@ module RNA_2D
 
 # README
 #
-# -structure type definition
+# -RNA 2D structure type definition
 # -structure validation (Vienna dot bracket)
 # -conversion between representations (dot bracket, mountain, base pair set)
 # -distance functions (mountain, base pair set, hausdorff)
@@ -12,41 +12,61 @@ module RNA_2D
 
 
 
-export structure,           #2D structure type
-       testDotBracket,      #tests Vienna dotbracket
+export rna2Dstructure,      #2D structure type
+       isValidDotBracket,   #tests Vienna dotbracket
        dotBracketToMountain,#dot bracket -> moutain
        dotBracketToBPSet,   #dot bracket -> bp set
        mountainDistance,    #dist(moutain1, mountain2)
        basePairSetDistance, #dist(bpset1, bpset2)
        hausdorffDistance,   #dist(bpset1, bpset2)
-       levenshteinDistance  #dist(string1, string2), aka edit distance
+       levenshteinDistance, #dist(string1, string2), aka edit distance
+       RNAshapes,           #(lvl5, lvl3, lvl1) RNA abstract shape
+       shapeLvl5Annotated   #annotated lvl5 abstract shape
 
 
 
-immutable structure
+immutable rna2Dstructure
   # 2D structure representation
   dotBracket::String              #Vienna dot bracket
   mountain::Vector{Int}           #mountain representation of the dot bracket
   base_pair_set::Vector{(Int,Int)}#base pair set (sorted) of the dot bracket
   energy::FloatingPoint           #energy of the structure
-  id                              #id of the sequence the structure belongs to
-  seq                             #sequence of the structure
+  id::String                      #id of the sequence the structure belongs to
+  seq::String                     #sequence of the structure
 
-  function structure{T <: String}(dotBracket::T;
-                                  energy = -Inf,
-                                  id = None,
-                                  seq=None)
-    @assert testDotBracket(dotBracket) == true
+  function rna2Dstructure{T <: String}(dotBracket::T;
+                                  energy = Inf,
+                                  id = "",
+                                  seq = "")
+    @assert isValidDotBracket(dotBracket) == true
     dotBracket = convert(String, dotBracket)
     mountain = dotBracketToMountain(dotBracket)
     base_pair_set = dotBracketToBPSet(dotBracket)
+    if seq != None
+      @assert isRNA(seq) == true
+      @assert length(seq) == length(dotBracket)
+    end
     new(dotBracket, mountain, base_pair_set, energy, id, seq)
   end
 end
 
 
 
-function testDotBracket(dotBracket::String)
+function isRNA{S<:String}(seq::S)
+  #verifies that the sequence is RNA
+  #accepts T
+  seq = uppercase(seq)
+  for nt in seq
+    if !(nt in ['A','T','C','G','U'])
+      return false
+    end
+  end
+  return true
+end
+
+
+
+function isValidDotBracket(dotBracket::String)
   #tests Vienna dot-bracket for illegal structure (or symbol)
   counter = 0
   for i in dotBracket
@@ -107,15 +127,6 @@ end
 
 
 
-function sequenceDotBracketToBPSeq{S<:String}(dotBracket::S, sequence::S)
-  #Vienna dotbracket 
-  #@assert 
-
-
-end
-
-
-
 function mountainDistance(m1::Vector{Int}, m2::Vector{Int})
   #lp1 mountain distance on two mountains representation of same length
   #e.g. [1,2,2,2,1], [1,2,3,2,1] = 1
@@ -137,11 +148,11 @@ function hausdorffDistance(bp1::Vector{(Int,Int)}, bp2::Vector{(Int,Int)})
   function distanceBP(a::(Int, Int), b::(Int, Int))
     return max(abs(a[1]-b[1]), abs(a[2]-b[2]))
   end
-  
+
   function distanceBPtoSet(a::(Int, Int), b::Vector{(Int,Int)})
     return minimum(map(x->distanceBP(a,x), b))
   end
-  
+
   hausdorffLefttoRight = maximum(map(x->distanceBPtoSet(x,bp2), bp1))
   hausdorffRightToLeft = maximum(map(x->distanceBPtoSet(x,bp1), bp2))
   return max(hausdorffLefttoRight, hausdorffRightToLeft)
@@ -177,36 +188,66 @@ function levenshteinDistance{T<:String}(s::T, t::T)
 end
 
 
+
+function toBPSeq{S<:String}(rnaSequence::S, dotBracket::S)
+  #outputs RNA sequence and structure to bpseq format
+  # index base paired (0->unpaired)
+  # 1 C 0
+  # 2 C 9
+  # 3 U 8
+  # 4 G 0
+  # 5 A 0
+  # 6 A 0
+  # 7 C 0
+  # 8 A 3
+  # 9 G 2
+  @assert isRNA(rnaSequence) == true
+  @assert isValidDotBracket(dotBracket) == true
+  pairs = dotBracketToBPSet(dotBracket)
+  result = (Int, Char, Int)[]
+  for (i, bp) in enumerate(collect(rnaSequence))
+    push!(result, (i, bp, 0))
+  end
+
+  for (bp1, bp2) in pairs
+    result[bp1] = (result[bp1][1], result[bp1][2], bp2)
+    result[bp2] = (result[bp2][1], result[bp2][2], bp1)
+  end
+  result
+end
+
+
+
 #multiple dispatch for structure type
-mountainDistance(s1::structure, s2::structure) = mountainDistance(s1.mountain, s2.mountain)
-basePairSetDistance(s1::structure, s2::structure) = basePairSetDistance(s1.base_pair_set, s2.base_pair_set)
-hausdorffDistance(s1::structure, s2::structure) = hausdorffDistance(s1.base_pair_set, s2.base_pair_set)
-levenshteinDistance(s1::structure, s2::structure) = levenshteinDistance(s1.dotBracket, s2.dotBracket)
+mountainDistance(s1::rna2Dstructure, s2::rna2Dstructure) = mountainDistance(s1.mountain, s2.mountain)
+basePairSetDistance(s1::rna2Dstructure, s2::rna2Dstructure) = basePairSetDistance(s1.base_pair_set, s2.base_pair_set)
+hausdorffDistance(s1::rna2Dstructure, s2::rna2Dstructure) = hausdorffDistance(s1.base_pair_set, s2.base_pair_set)
+levenshteinDistance(s1::rna2Dstructure, s2::rna2Dstructure) = levenshteinDistance(s1.dotBracket, s2.dotBracket)
+toBPSeq(s::rna2Dstructure) = toBPSeq(s.seq, s.dotBracket)
 
 
 
-
-function getStems(structure::String)
+function getStems(dotBracket::String)
   #helper for abstract shape analysis
   #returns the stems
-  @assert RNA_2D.testDotBracket(structure) == true
+  @assert isValidDotBracket(dotBracket) == true
   list_opener = Int[]
   stems = (Vector{Int}, Vector{Int}, Dict{Int, Int})[]
   list_stem_end = Int[]
 
   i = 1
   # separate into stems
-  while i <= length(structure)
+  while i <= length(dotBracket)
     #add to opening list
-    if structure[i] == '('
+    if dotBracket[i] == '('
       push!(list_opener, i)
 
     #find the closing in the opening list
-    elseif structure[i] == ')'
+    elseif dotBracket[i] == ')'
       stem = (Int[], Int[], Dict{Int, Int}())
 
-      while i <= length(structure)
-        if structure[i] == ')'
+      while i <= length(dotBracket)
+        if dotBracket[i] == ')'
           opener = pop!(list_opener)
           push!(stem[1], opener)
           push!(stem[2], i)
@@ -217,7 +258,7 @@ function getStems(structure::String)
             break
           end
 
-        elseif structure[i] =='('
+        elseif dotBracket[i] =='('
           if (!isempty(list_opener))
             push!(list_stem_end, list_opener[end])
           end
@@ -236,11 +277,11 @@ function getStems(structure::String)
 end
 
 
-function RNAshapes(structure::String)
-  #computes RNA abstract shapes level 1, 3 and 5 for the given structure string
+function RNAshapes(dotBracket::String)
+  #computes RNA abstract shapes level 1, 3 and 5 for the given dotBracket string
 
   #get the stems
-  stems = getStems(structure)
+  stems = getStems(dotBracket)
 
   # build the level1 for each stems
   range_occupied = {}
@@ -284,13 +325,13 @@ function RNAshapes(structure::String)
   level1 = ""
   level5 = ""
 
-  for i= 1:length(structure)
+  for i= 1:length(dotBracket)
     if i in keys(dict_lvl1)
       level1 = string(level1, dict_lvl1[i]["elem"])
       level5 = string(level5, dict_lvl1[i]["lvl5"])
     end
 
-    if structure[i] == '.' && (! endswith(level1, "_")) && (!(i in range_occupied))
+    if dotBracket[i] == '.' && (! endswith(level1, "_")) && (!(i in range_occupied))
       level1 = string(level1, "_")
     end
   end
@@ -308,14 +349,15 @@ function RNAshapes(structure::String)
 end
 
 
-function shapeLvl5Annotated{T<:String}(structure::T)
+
+function shapeLvl5Annotated{T<:String}(dotBracket::T)
   #annotate the lvl 5 abstract shape
   #2 annotations
   #(first opening, last closing, number of base pairs)
   #(first opening, last closing, (range opening, range closing))
-  @assert testDotBracket(structure) == true
+  @assert isValidDotBracket(dotBracket) == true
 
-  stems = getStems(structure)
+  stems = getStems(dotBracket)
   println(stems)
   pairs1 = (Int, Int,Int)[]         #3rd field number of base pairs
   pairs2 = (Int, Int, (Int, Int))[] #3rd field is (range_open, range_close)

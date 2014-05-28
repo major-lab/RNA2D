@@ -6,10 +6,10 @@ using Base.Test
 require("../src/RNA_2D.jl")
 
 
-function test_structure()
-  a = RNA_2D.structure("(.)(((((....)))))", id=1)
-  b = RNA_2D.structure("(.)(.)(...........)", id="2", energy=-42.0)
-  c = RNA_2D.structure("(.)")
+function test_rna2Dstructure()
+  a = RNA_2D.rna2Dstructure("(.)(((((....)))))", id=1)
+  b = RNA_2D.rna2Dstructure("(.)(.)(...........)", id="2", energy=-42.0)
+  c = RNA_2D.rna2Dstructure("(.)")
   return true
 end
 
@@ -79,16 +79,16 @@ function randomDotBracketPlus()
   end
 end
 
-function test_testDotBracket1()
-  @test RNA_2D.testDotBracket("((((.)))") == false #missing brackets on the right
-  @test RNA_2D.testDotBracket("(((.))))") == false #missing brackets on the left
+function test_isValidDotBracket1()
+  @test RNA_2D.isValidDotBracket("((((.)))") == false #missing brackets on the right
+  @test RNA_2D.isValidDotBracket("(((.))))") == false #missing brackets on the left
 end
 
 
-function test_testDotBracket2(n::Int)
+function test_isValidDotBracket2(n::Int)
   @assert n > 0
   for i = 1:n
-    @test RNA_2D.testDotBracket(randomDotBracket())==true
+    @test RNA_2D.isValidDotBracket(randomDotBracket())==true
   end
   return true
 end
@@ -133,10 +133,10 @@ end
 
 function test_all()
   println("")
-  test_structure()
+  test_rna2Dstructure()
   println("structure constructor           [OK]")
-  test_testDotBracket1()
-  test_testDotBracket2(10000)
+  test_isValidDotBracket1()
+  test_isValidDotBracket2(10000)
   println("dot bracket verification        [OK]")
   test_hausdorffDistance(100)
   println("hausdorff distance tested       [OK]")
