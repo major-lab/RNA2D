@@ -19,7 +19,7 @@ is up for change anytime if some better idea comes along.
 ## License
 
 This repository is under MIT license.
-If you disagree with that, well, that's just, like, your opinion, man.
+If you disagree with that, [well, that's just, like, your opinion, man](https://www.youtube.com/watch?v=pWdd6_ZxX8c).
 
 ## Dependencies (so far)
 
