@@ -1,6 +1,6 @@
 module RNA_2D
 
-
+import Base.show
 # README
 #
 # -RNA 2D structure type definition
@@ -42,7 +42,7 @@ immutable rna2Dstructure
     dotBracket = convert(String, dotBracket)
     mountain = dotBracketToMountain(dotBracket)
     base_pair_set = dotBracketToBPSet(dotBracket)
-    if seq != None
+    if seq != ""
       @assert isRNA(seq) == true
       @assert length(seq) == length(dotBracket)
     end
@@ -358,7 +358,7 @@ function shapeLvl5Annotated{T<:String}(dotBracket::T)
   @assert isValidDotBracket(dotBracket) == true
 
   stems = getStems(dotBracket)
-  println(stems)
+  #println(stems)
   pairs1 = (Int, Int,Int)[]         #3rd field number of base pairs
   pairs2 = (Int, Int, (Int, Int))[] #3rd field is (range_open, range_close)
   for stem in stems
@@ -376,6 +376,77 @@ function shapeLvl5Annotated{T<:String}(dotBracket::T)
 end
 
 
+type shape
+  #representation of lvl5 shape
+  leftMost::Int
+  rightMost::Int
+  basePairs::Dict{Int, Int}
+  #no children implies shape is a leaf
+  children::Vector{shape} # length(children) != 1
+  parent::Union(shape, UnionType)
+
+  function shape(leftMost,
+                rightMost,
+                basePairs,
+                children=shape[],
+                parent = None)
+    new(leftMost, rightMost, basePairs, children, parent)
+  end
+end
+
+
+
+function shapeTreeToString(root::shape)
+  #show preorder traversal of the shape (will output lvl5 shape, with annotation)
+  shapeVector = (Int, String)[]
+  function preOrder(s::shape)
+    push!(shapeVector, (s.leftMost, "["))
+    push!(shapeVector, (s.rightMost, "]$(length(s.basePairs))"))
+    for child in s.children
+      preOrder(child)
+    end
+  end
+  for s in root.children
+    preOrder(s)
+  end
+  join(map(x->x[2], sort(shapeVector)))
+end
+
+function show(io::IO, root::shape)
+  write(io, shapeTreeToString(root))
+end
+
+
+function dotBracketToShapeTree{S<:String}(dotBracket::S)
+  #Vienna dot bracket to lvl5 shape tree
+  @assert isValidDotBracket(dotBracket) == true
+  stems = sort(getStems(dotBracket), by = x->minimum(x[1]))
+  leftRight = (Int, Int, Dict{Int, Int})[]
+  for stem in stems
+    push!(leftRight, (minimum(stem[1]), maximum(stem[2]), stem[3]))
+  end
+
+  root = shape(0, length(dotBracket)+1, Dict{Int, Int}())
+  position = root
+  closing = Int[]
+  i = 1
+  while length(leftRight) != 0
+    #opening case
+    if leftRight[1][1] == i
+      stem = shift!(leftRight)
+      push!(closing, stem[2])
+      child = shape(stem[1], stem[2], stem[3], shape[], position)
+      push!(position.children, child)
+      position = child #go down
+
+    #closing case
+    elseif i in closing
+      position = position.parent #go up
+    end
+    i+=1
+  end
+  root
+end
 
 
 end

@@ -150,4 +150,7 @@ end
 
 
 
-//BEGIN forward: INSIDE ALGORITHM
+#BEGIN forward: INSIDE ALGORITHM
+
+
+#END forward : INSIDE ALGORITHM

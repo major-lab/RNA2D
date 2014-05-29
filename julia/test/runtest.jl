@@ -7,7 +7,7 @@ require("../src/RNA_2D.jl")
 
 
 function test_rna2Dstructure()
-  a = RNA_2D.rna2Dstructure("(.)(((((....)))))", id=1)
+  a = RNA_2D.rna2Dstructure("(.)(((((....)))))", id="1")
   b = RNA_2D.rna2Dstructure("(.)(.)(...........)", id="2", energy=-42.0)
   c = RNA_2D.rna2Dstructure("(.)")
   return true
@@ -130,6 +130,14 @@ function test_hausdorffDistance(n::Int)
   end
 end
 
+function test_dotBracketToShapeTree(n::Int)
+  #
+  @assert n>0
+  for i = 1:n
+    struct = randomDotBracketPlus()
+    @test RNA_2D.shapeLvl5Annotated(struct)[3] == RNA_2D.shapeTreeToString(RNA_2D.dotBracketToShapeTree(struct))
+  end
+end
 
 function test_all()
   println("")
@@ -139,7 +147,9 @@ function test_all()
   test_isValidDotBracket2(10000)
   println("dot bracket verification        [OK]")
   test_hausdorffDistance(100)
-  println("hausdorff distance tested       [OK]")
+  println("hausdorff distance              [OK]")
+  test_dotBracketToShapeTree(100)
+  println("shape tree                      [OK]")
   println("")
   return true
 end
