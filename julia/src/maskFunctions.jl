@@ -151,8 +151,7 @@ end
 
 
 function conciliateUnbalancedMask{S<:String}(unbalancedMask1::S, unbalancedMask2::S)
-  #as implemented in flashfold (by Paul Dallaire)
-  #conciliates or returns an error
+  #conciliate
   @assert length(masks1) == length(masks2)
   for sym in collect(unbalancedMask1)
     @assert sym in keys(symbols)
@@ -181,25 +180,24 @@ function conciliateUnbalancedMask{S<:String}(unbalancedMask1::S, unbalancedMask2
   }
 
   const conciliationMatrix = Array[
-  #this is copied from flashfold C script
   # warning : Julia is row-major (and 1-based, but that's been fixed)
   #)  (  .  x  |  -  [  ]  +  _  <  >  !  p  q 
   #1  2  3  4  5  6  7  8  9  10 11 12 13 14 15
   [ 1, 0, 0, 1, 1,12, 0, 8, 8, 8, 0,12,12, 0, 1], # ) 1   reverse paired
   [ 0, 2, 0, 2, 2,11, 7, 0, 7, 7,11, 0,11, 2, 0], # ( 2   forward paired
-  [ 0, 0, 3, 3, 0, 6, 0, 0, 0,10, 0, 0, 0, 3, 3], # . 3   unpaired
+  [ 0, 0, 3, 3, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 3], # . 3   unpaired
   [ 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15], # x 4   don't care
   [ 1, 2, 0, 5, 5,13, 7, 8, 9, 9,11,12,13,14,15], # | 5   paired
-  [12,11, 6, 6,13, 6, 0, 0, 0, 3,11,12,13, 0, 0], # - 6   not canonically paired
-  [ 0, 7, 0, 7, 7, 0, 7, 0, 7, 7, 0, 0, 0, 7, 0], # [ 7   forward canonically paired
-  [ 8, 0, 0, 8, 8, 0, 0, 8, 8, 8, 0, 0, 0, 0, 8], # ] 8   reverse canonically paired
-  [ 8, 7, 0, 9, 9, 0, 7, 8, 9, 9, 0, 0, 0, 0, 0], # + 9   canonically paired
-  [ 8, 7,10,10, 9, 3, 7, 8, 9,10, 0, 0, 0, 0, 0], # _ 10  not (paired non canonically)
-  [ 0,11, 0,11,11,11, 0, 0, 0, 0,11, 0,11,11, 0], # < 11  forward paired non canonically
-  [12, 0, 0,12,12,12, 0, 0, 0, 0, 0,12,12, 0,12], # > 12  reverse paired non canonically
-  [12,11, 0,13,13,13, 0, 0, 0, 0,11,12,13, 0, 0], # ! 13  paired non canonically
-  [ 0, 2, 3,14,14, 0, 7, 0, 0, 0,11, 0, 0,14, 0], # p 14  not reverse paired
-  [ 1, 0, 3,15,15, 0, 0, 8, 0, 0, 0,12, 0, 0,15]  # q 15  not forward paired
+  [12,11, 3, 6,13, 6, 0, 0, 0, 3,11,12,13, 0, 0], # - 6   not (canonically paired)
+  [ 0, 7, 0, 7, 7, 0, 7, 0, 7, 7, 0, 0, 0, 7, 0], # [ 7   forward (canonically paired)
+  [ 8, 0, 0, 8, 8, 0, 0, 8, 8, 8, 0, 0, 0, 0, 8], # ] 8   reverse (canonically paired)
+  [ 8, 7, 0, 9, 9, 0, 7, 8, 9, 9, 0, 0, 0, 0, 0], # + 9   (canonically paired)
+  [ 8, 7, 3,10, 9, 3, 7, 8, 9,10, 0, 0, 0, 0, 0], # _ 10  not (paired non canonically)
+  [ 0,11, 0,11,11,11, 0, 0, 0, 0,11, 0,11,11, 0], # < 11  forward (paired non canonically)
+  [12, 0, 0,12,12,12, 0, 0, 0, 0, 0,12,12, 0,12], # > 12  reverse (paired non canonically)
+  [12,11, 0,13,13,13, 0, 0, 0, 0,11,12,13, 0, 0], # ! 13  (paired non canonically)
+  [ 0, 2, 3,14, 2,11, 7, 0, 7, 0,11, 0, 0,14, 0], # p 14  not (reverse paired)
+  [ 1, 0, 3,15, 1,12, 0, 8, 8, 0, 0,12, 0, 0,15]  # q 15  not (forward paired)
   ]
 
   unbalancedMask1 = map(x->symbols[x], collect(unbalancedMask1))

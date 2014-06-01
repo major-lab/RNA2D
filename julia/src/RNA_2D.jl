@@ -1,4 +1,3 @@
-module RNA_2D
 
 import Base.show
 # README
@@ -12,16 +11,16 @@ import Base.show
 
 
 
-export rna2Dstructure,      #2D structure type
-       isValidDotBracket,   #tests Vienna dotbracket
-       dotBracketToMountain,#dot bracket -> moutain
-       dotBracketToBPSet,   #dot bracket -> bp set
-       mountainDistance,    #dist(moutain1, mountain2)
-       basePairSetDistance, #dist(bpset1, bpset2)
-       hausdorffDistance,   #dist(bpset1, bpset2)
-       levenshteinDistance, #dist(string1, string2), aka edit distance
-       RNAshapes,           #(lvl5, lvl3, lvl1) RNA abstract shape
-       shapeLvl5Annotated   #annotated lvl5 abstract shape
+# export rna2Dstructure,      #2D structure type
+#        isValidDotBracket,   #tests Vienna dotbracket
+#        dotBracketToMountain,#dot bracket -> moutain
+#        dotBracketToBPSet,   #dot bracket -> bp set
+#        mountainDistance,    #dist(moutain1, mountain2)
+#        basePairSetDistance, #dist(bpset1, bpset2)
+#        hausdorffDistance,   #dist(bpset1, bpset2)
+#        levenshteinDistance, #dist(string1, string2), aka edit distance
+#        RNAshapes,           #(lvl5, lvl3, lvl1) RNA abstract shape
+#        shapeLvl5Annotated   #annotated lvl5 abstract shape
 
 
 
@@ -384,13 +383,14 @@ type shape
   #no children implies shape is a leaf
   children::Vector{shape} # length(children) != 1
   parent::Union(shape, UnionType)
+  pairCount::Int
 
   function shape(leftMost,
                 rightMost,
                 basePairs,
                 children=shape[],
                 parent = None)
-    new(leftMost, rightMost, basePairs, children, parent)
+    new(leftMost, rightMost, basePairs, children, parent, 0)
   end
 end
 
@@ -449,4 +449,24 @@ function dotBracketToShapeTree{S<:String}(dotBracket::S)
 end
 
 
+function getBPCount(inputShape::shape)
+  #returns the number of bp nested in the shape
+  count = Int[]
+  function preOrder(s::shape)
+    #preorder traversal
+    push!(count,length(s.basePairs))
+    for child in s.children
+      preOrder(child)
+    end
+  end
+  preOrder(inputShape)
+  sum(count)
 end
+
+
+function possibleMatch(shape1::shape, shape2::shape)
+
+
+end
+
+
