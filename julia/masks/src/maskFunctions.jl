@@ -226,3 +226,142 @@ function conciliateUnbalancedMask{S<:String}(unbalancedMask1::S, unbalancedMask2
     error(join(errorMessage))
   end
 end
+
+
+
+function shapeLvl5Annotated{T<:String}(dotBracket::T)
+  #annotate the lvl 5 abstract shape
+  #2 annotations
+  #(first opening, last closing, number of base pairs)
+  #(first opening, last closing, (range opening, range closing))
+  @assert isValidDotBracket(dotBracket) == true
+
+  stems = getStems(dotBracket)
+  #println(stems)
+  pairs1 = (Int, Int,Int)[]         #3rd field number of base pairs
+  pairs2 = (Int, Int, (Int, Int))[] #3rd field is (range_open, range_close)
+  for stem in stems
+    push!(pairs1, (minimum(stem[1]), maximum(stem[2]), length(stem[3])))
+    push!(pairs2, (minimum(stem[1]), maximum(stem[2]),(maximum(stem[1])- minimum(stem[1]), maximum(stem[2])-minimum(stem[2]))))
+  end
+
+  lvl5 = (Int, String)[]
+  for stem in pairs1
+    push!(lvl5, (stem[1], "["))
+    push!(lvl5, (stem[2], "]$(stem[3])"))
+  end
+  sort!(lvl5)
+  (sort(pairs1), sort(pairs2), join(map(x->x[2], lvl5)))
+end
+
+
+type shape
+  #representation of lvl5 shape
+  leftMost::Int
+  rightMost::Int
+  basePairs::Dict{Int, Int}
+  #no children implies shape is a leaf
+  children::Vector{shape} # length(children) != 1
+  parent::Union(shape, UnionType)
+  pairCount::Int
+
+  function shape(leftMost,
+                rightMost,
+                basePairs,
+                children=shape[],
+                parent = None)
+    new(leftMost, rightMost, basePairs, children, parent, 0)
+  end
+end
+
+
+
+
+
+function shapeTreeToString(root::shape)
+  #show preorder traversal of the shape (will output lvl5 shape, with annotation)
+  shapeVector = (Int, String)[]
+  function preOrder(s::shape)
+    push!(shapeVector, (s.leftMost, "["))
+    push!(shapeVector, (s.rightMost, "]$(length(s.basePairs))"))
+    for child in s.children
+      preOrder(child)
+    end
+  end
+  for s in root.children
+    preOrder(s)
+  end
+  join(map(x->x[2], sort(shapeVector)))
+end
+
+function show(io::IO, root::shape)
+  write(io, shapeTreeToString(root))
+end
+
+
+function dotBracketToShapeTree{S<:String}(dotBracket::S)
+  #Vienna dot bracket to lvl5 shape tree
+  @assert isValidDotBracket(dotBracket) == true
+  stems = sort(getStems(dotBracket), by = x->minimum(x[1]))
+  leftRight = (Int, Int, Dict{Int, Int})[]
+  for stem in stems
+    push!(leftRight, (minimum(stem[1]), maximum(stem[2]), stem[3]))
+  end
+
+  root = shape(0, length(dotBracket)+1, Dict{Int, Int}())
+  position = root
+  closing = Int[]
+  i = 1
+  while length(leftRight) != 0
+    #opening case
+    if leftRight[1][1] == i
+      stem = shift!(leftRight)
+      push!(closing, stem[2])
+      child = shape(stem[1], stem[2], stem[3], shape[], position)
+      push!(position.children, child)
+      position = child #go down
+
+    #closing case
+    elseif i in closing
+      position = position.parent #go up
+    end
+    i+=1
+  end
+  root
+end
+
+
+function getBPCount(inputShape::shape)
+  #returns the number of bp nested in the shape
+  count = Int[]
+  function preOrder(s::shape)
+    #preorder traversal
+    push!(count,length(s.basePairs))
+    for child in s.children
+      preOrder(child)
+    end
+  end
+  preOrder(inputShape)
+  sum(count)
+end
+
+
+function removeUnpaired{S<:String}(dotBracket::S)
+  #removes the unpaired character '.' from the dotbracket
+  @assert isValidDotBracket(dotBracket)
+  result = Char[]
+  for c in dotBracket
+    if c =='(' || c==')'
+      push!(result, c)
+    end
+  end
+  CharString(result)
+end
+
+
+function dotBracketToTree{S<:String}(dotBracket::S)
+  #
+  @assert isValidDotBracket(dotBracket)
+  result = Tree()
+  
+end

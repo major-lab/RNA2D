@@ -1,15 +1,11 @@
 #unit tests for the RNA_2D module
 
-
 using Base.Test
 
-require("../src/RNA_2D.jl")
-
-
 function test_rna2Dstructure()
-  a = RNA_2D.rna2Dstructure("(.)(((((....)))))", id="1")
-  b = RNA_2D.rna2Dstructure("(.)(.)(...........)", id="2", energy=-42.0)
-  c = RNA_2D.rna2Dstructure("(.)")
+  a = rna2Dstructure("(.)(((((....)))))", id="1")
+  b = rna2Dstructure("(.)(.)(...........)", id="2", energy=-42.0)
+  c = rna2Dstructure("(.)")
   return true
 end
 
@@ -80,15 +76,15 @@ function randomDotBracketPlus()
 end
 
 function test_isValidDotBracket1()
-  @test RNA_2D.isValidDotBracket("((((.)))") == false #missing brackets on the right
-  @test RNA_2D.isValidDotBracket("(((.))))") == false #missing brackets on the left
+  @test isValidDotBracket("((((.)))") == false #missing brackets on the right
+  @test isValidDotBracket("(((.))))") == false #missing brackets on the left
 end
 
 
 function test_isValidDotBracket2(n::Int)
   @assert n > 0
   for i = 1:n
-    @test RNA_2D.isValidDotBracket(randomDotBracket())==true
+    @test isValidDotBracket(randomDotBracket())==true
   end
   return true
 end
@@ -102,7 +98,7 @@ function test_RNAshapes(n::Int)
     t5 = chomp(readall(`RNAshapes -D $dotB -t5`))
     t3 = chomp(readall(`RNAshapes -D $dotB -t3`))
     t1 = chomp(readall(`RNAshapes -D $dotB -t1`))
-    result = RNA_2D.RNAshapes(dotB)
+    result = RNAshapes(dotB)
     @test t5 == result[1]
     @test t3 == result[2]
     @test t1 == result[3]
@@ -118,15 +114,15 @@ function test_hausdorffDistance(n::Int)
   S1 = "........((((...))))."
   S2 = ".......((((...)))).."
 
-  B1 = RNA_2D.dotBracketToBPSet(S1)
-  B2 = RNA_2D.dotBracketToBPSet(S2)
+  B1 = dotBracketToBPSet(S1)
+  B2 = dotBracketToBPSet(S2)
 
-  @test RNA_2D.hausdorffDistance(B1,B2) == 1
+  @test hausdorffDistance(B1,B2) == 1
 
   for i = 1:n
-    a = RNA_2D.dotBracketToBPSet(randomDotBracketPlus())
-    b = RNA_2D.dotBracketToBPSet(randomDotBracketPlus())
-    RNA_2D.hausdorffDistance(a,b)
+    a = dotBracketToBPSet(randomDotBracketPlus())
+    b = dotBracketToBPSet(randomDotBracketPlus())
+    hausdorffDistance(a,b)
   end
 end
 
@@ -135,7 +131,7 @@ function test_dotBracketToShapeTree(n::Int)
   @assert n>0
   for i = 1:n
     struct = randomDotBracketPlus()
-    @test RNA_2D.shapeLvl5Annotated(struct)[3] == RNA_2D.shapeTreeToString(RNA_2D.dotBracketToShapeTree(struct))
+    @test shapeLvl5Annotated(struct)[3] == shapeTreeToString(dotBracketToShapeTree(struct))
   end
 end
 
