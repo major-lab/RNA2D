@@ -3,13 +3,13 @@ RNA 2D tools
 ![](https://raw.githubusercontent.com/major-lab/RNA_2D_tools/master/logo.jpg)
 ## Description
 
-Collection of 2D RNA tools that could be useful for people.
+Collection of 2D RNA scripts, snippets and related stuff.
 
 ## Contributing
 
-You think your stuff is interesting/useful/cool, just add it.
+You think your code is interesting/useful/cool, just add it.
 Bug reports are very welcome (use the issue feature of github please).
-Please, use tests, just do. Examples and documentation are also very welcome.
+Please use tests, examples and documentation.
 
 ## Organization
 
