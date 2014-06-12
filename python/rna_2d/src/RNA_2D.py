@@ -1,6 +1,7 @@
 
 class rna2Dstructure(object):
-    """2D structure representation of RNA"""
+    """2D structure representation of RNA
+    stores only information about base pairs in Vienna format"""
     def __init__(self, dotBracket, energy=float("inf"),\
                  identification="", seq="" ):
       assert isRNA(seq)
@@ -11,14 +12,21 @@ class rna2Dstructure(object):
       self.seq = seq
 
 
+class rna3Dstructure(object):
+    """simplified 3D representation of RNA
+    (only care about base pairs)"""
+    def __init__(self, basePairMatrix):
+        self.pairs = basePairMatrix
+
 
 def isRNA(seq):
-    """verifies the identity of the nucleotides in the sequence"""
+    """verifies the identity of the nucleotides in the RNA sequence"""
     upperSeq = seq.upper()
     for nt in upperSeq:
         if not(nt in ['A','T','C','G','U']):
             return False
     return True
+
 
 def isValidDotBracket(dotBracket):
     """tests Vienna dot-bracket for illegal structure (or symbol)"""
@@ -68,7 +76,6 @@ def dotBracketToBPSet(dotBracket):
     return bpset
 
 
-
 def mountainDistance(mountain1, mountain2):
     """lp1 mountain distance on two mountains representation of same length
     e.g. [1,2,2,2,1], [1,2,3,2,1] = 1"""
@@ -79,12 +86,9 @@ def mountainDistance(mountain1, mountain2):
     return sum(map(lambda x:absdiff(x), zip(m1, m2)))
 
 
-
 def basePairSetDistance(bp1, bp2):
   """naive base pair distance (cardinality of symmetric difference, |(A\B)U(B\A)|)"""
   return len((set(bp1).symmetric_difference(set(bp2))))
-
-
 
 
 def toBPSeq(rnaSequence, dotBracket):
@@ -111,7 +115,6 @@ def toBPSeq(rnaSequence, dotBracket):
         result[bp1] = (result[bp1][0], result[bp1][1], bp2)
         result[bp2] = (result[bp2][0], result[bp2][1], bp1)
     return "\n".join(map(lambda x: str(x[0])+" "+str(x[1])+ " "+ str(x[2]), result[1:]))
-
 
 
 def getStems(dotBracket):
@@ -148,7 +151,9 @@ def getStems(dotBracket):
                 i += 1
             stems.append(stem)
         i += 1
+        stems.sort(reverse=True)
     return stems
+
 
 
 

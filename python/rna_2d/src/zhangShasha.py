@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#Authors: Tim Henderson and Steve Johnson
-#Email: tim.tadh@gmail.com, steve@steveasleep.com
-#For licensing see the LICENSE file in the top level directory.
+
 
 import collections
 
@@ -12,8 +10,8 @@ try:
 except ImportError:
     def py_zeros(dim, pytype):
         assert len(dim) == 2
-        return [[pytype() for y in xrange(dim[1])]
-                for x in xrange(dim[0])]
+        return [[pytype() for y in range(dim[1])]
+                for x in range(dim[0])]
     zeros = py_zeros
 
 try:
@@ -25,11 +23,66 @@ except ImportError:
         else:
             return 1
 
-from zss.simple_tree import Node
+
+class Node(object):
+    """
+    A simple node object that can be used to construct trees
+    """
+    def __init__(self, parent, label=u"\u25A9", children=None):
+        if parent is not None:
+            assert isinstance(parent, Node)
+            parent.children.append(self)
+        self.label = label
+        self.children = list()
+        self.parent = parent
+
+    @staticmethod
+    def get_children(node):
+        """
+        Default value of ``get_children`` argument of :py:func:`zss.distance`.
+        """
+        return node.children
+
+    @staticmethod
+    def get_label(node):
+        """
+        Default value of ``get_label`` argument of :py:func:`zss.distance`.
+        """
+        return node.label
+
+    def __eq__(self, b):
+        if b is not None:
+            return False
+        if not isinstance(b, Node):
+            raise TypeError("Must compare against type Node")
+        return self.label == b.label
+
+    def __ne__(self, b):
+        return not self.__eq__(b)
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __str__(self, prefix="", is_tail=True):
+        """ tree representation inspired by
+        http://stackoverflow.com/questions/4965335"""
+        result = prefix + (
+            "└── " if is_tail else "├── ") + str(self.label) + "\n"
+        for c in range(0, len(self.children)-1):
+            result += self.children[c].__str__(
+                prefix + ("    " if is_tail else "│   "), False)
+        if len(self.children) >= 1:
+            result += self.children[-1].__str__(
+                prefix + ("    " if is_tail else "│   "), True)
+        return result
+
+    def append(self, other_node):
+        assert isinstance(other_node, Node)
+        self.children.append(other_node)
 
 
 class AnnotatedTree(object):
-
+    """ tree object used for the computation of tree edit distance"""
     def __init__(self, root, get_children):
         self.get_children = get_children
 
@@ -41,10 +94,9 @@ class AnnotatedTree(object):
         self.nodes = list()  # a pre-order enumeration of the nodes in the tree
         self.lmds = list()   # left most descendents
         self.keyroots = None
-            # k and k' are nodes specified in the pre-order enumeration.
-            # keyroots = {k | there exists no k'>k such that lmd(k) == lmd(k')}
-            # see paper for more on keyroots
-
+        # k and k' are nodes specified in the pre-order enumeration.
+        # keyroots = {k | there exists no k'>k such that lmd(k) == lmd(k')}
+        # see paper for more on keyroots
         stack = list()
         pstack = list()
         stack.append((root, collections.deque()))
@@ -63,16 +115,17 @@ class AnnotatedTree(object):
         i = 0
         while len(pstack) > 0:
             n, anc = pstack.pop()
-            #print list(anc)
             self.nodes.append(n)
-            #print n.label, [a.label for a in anc]
             if not self.get_children(n):
                 lmd = i
                 for a in anc:
-                    if a not in lmds: lmds[a] = i
-                    else: break
+                    if a not in lmds:
+                        lmds[a] = i
+                    else:
+                        break
             else:
-                try: lmd = lmds[n._id]
+                try:
+                    lmd = lmds[n._id]
                 except:
                     import pdb
                     pdb.set_trace()
@@ -83,7 +136,7 @@ class AnnotatedTree(object):
 
 
 def simple_distance(A, B, get_children=Node.get_children,
-        get_label=Node.get_label, label_dist=strdist):
+                    get_label=Node.get_label, label_dist=strdist):
     """Computes the exact tree edit distance between trees A and B.
 
     Use this function if both of these things are true:
@@ -122,6 +175,14 @@ def simple_distance(A, B, get_children=Node.get_children,
         remove_cost=lambda node: label_dist(get_label(node), ''),
         update_cost=lambda a, b: label_dist(get_label(a), get_label(b)),
     )
+
+
+def unlabeled_distance(A, B, get_children=Node.get_children):
+    """ unlabeled tree distance """
+    INS = lambda x: 1
+    DEL = lambda x: 1
+    SUBS = lambda x, y: 0
+    return distance(A, B, get_children, INS, DEL, SUBS)
 
 
 def distance(A, B, get_children, insert_cost, remove_cost, update_cost):
@@ -166,18 +227,18 @@ def distance(A, B, get_children, insert_cost, remove_cost, update_cost):
 
         m = i - Al[i] + 2
         n = j - Bl[j] + 2
-        fd = zeros((m,n), int)
+        fd = zeros((m, n), int)
 
         ioff = Al[i] - 1
         joff = Bl[j] - 1
 
-        for x in xrange(1, m): # δ(l(i1)..i, θ) = δ(l(1i)..1-1, θ) + γ(v → λ)
+        for x in range(1, m):  # δ(l(i1)..i, θ) = δ(l(1i)..1-1, θ) + γ(v → λ)
             fd[x][0] = fd[x-1][0] + remove_cost(An[x-1])
-        for y in xrange(1, n): # δ(θ, l(j1)..j) = δ(θ, l(j1)..j-1) + γ(λ → w)
+        for y in range(1, n):  # δ(θ, l(j1)..j) = δ(θ, l(j1)..j-1) + γ(λ → w)
             fd[0][y] = fd[0][y-1] + insert_cost(Bn[y-1])
 
-        for x in xrange(1, m): ## the plus one is for the xrange impl
-            for y in xrange(1, n):
+        for x in range(1, m):  # the plus one is for the xrange impl
+            for y in range(1, n):
                 # only need to check if x is an ancestor of i
                 # and y is an ancestor of j
                 if Al[i] == Al[x+ioff] and Bl[j] == Bl[y+joff]:
@@ -201,15 +262,15 @@ def distance(A, B, get_children, insert_cost, remove_cost, update_cost):
                     #                   +-
                     p = Al[x+ioff]-1-ioff
                     q = Bl[y+joff]-1-joff
-                    #print (p, q), (len(fd), len(fd[0]))
                     fd[x][y] = min(
                         fd[x-1][y] + remove_cost(An[x+ioff]),
                         fd[x][y-1] + insert_cost(Bn[y+joff]),
                         fd[p][q] + treedists[x+ioff][y+joff]
                     )
-
     for i in A.keyroots:
         for j in B.keyroots:
-            treedist(i,j)
-
+            treedist(i, j)
     return treedists[-1][-1]
+
+
+__all__ = ['unlabeled_distance', 'Node']
