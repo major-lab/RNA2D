@@ -5,33 +5,40 @@ and some generic operations"""
 class RNA2dStructure(object):
     """2D structure representation of RNA
     stores only information about base pairs in Vienna format"""
+    __slots__ = ['dot_bracket', 'energy', 'identification', 'seq']
+
     def __init__(self,
                  dot_bracket,
                  energy=float("inf"),
                  identification="",
                  seq=""):
-        assert is_rna(seq)
         assert is_valid_dot_bracket(dot_bracket)
         self.dot_bracket = dot_bracket
         self.energy = energy
         self.identification = identification
-        self.seq = seq
+        self.seq = check_format_rna(seq)
+
+    def __str__(self):
+        return self.dot_bracket + "\n" + self.seq
+
+    def __repr__(self):
+        return self.__str__()
 
 
-class RNA3dStructure(object):
-    """simplified 3D representation of RNA
-    (only care about base pairs)"""
-    def __init__(self, base_pair_matrix):
-        self.pairs = base_pair_matrix
+def only_paired(dot_bracket):
+    """remove '.' character from dot_bracket"""
+    assert is_valid_dot_bracket(dot_bracket), "invalid dot-bracket"
+    return "".join([i for i in dot_bracket if i != '.'])
 
 
-def is_rna(seq):
+def check_format_rna(seq):
     """verifies the identity of the nucleotides in the RNA sequence"""
-    upper_seq = seq.upper()
-    for nucleotide in upper_seq:
-        if not(nucleotide in ['A', 'T', 'C', 'G', 'U']):
-            return False
-    return True
+    result = [char.upper() for char in seq]
+    for nucleotide in result:
+        assert nucleotide in ['A', 'T', 'C', 'G', 'U'], "illegal character"
+        if nucleotide == 'T':
+            nucleotide = 'U'
+    return result
 
 
 def is_valid_dot_bracket(dot_bracket):
@@ -112,9 +119,9 @@ def to_bpseq(rna_sequence, dot_bracket):
     7 C 0
     8 A 3
     9 G 2"""
-    assert is_rna(rna_sequence), "invalid RNA sequence"
     assert is_valid_dot_bracket(dot_bracket), "invalid dot-bracket"
     assert len(rna_sequence) == len(dot_bracket)
+    rna_sequence = check_format_rna(rna_sequence)
     base_pairs = dot_bracket_to_bp_set(dot_bracket)
     result = list()  # (Int, Char, Int)
     result.append("header")
@@ -169,5 +176,8 @@ def get_stems(dot_bracket):
     return stems
 
 
-__all__ = ["RNA2dStructure", "RNA3dStructure", "is_rna",
-           "is_valid_dot_bracket", "to_bpseq", "get_stems"]
+__all__ = ["RNA2dStructure",
+           "check_format_rna",
+           "is_valid_dot_bracket",
+           "to_bpseq",
+           "get_stems"]

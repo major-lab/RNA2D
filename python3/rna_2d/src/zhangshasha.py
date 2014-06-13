@@ -1,6 +1,7 @@
 """tree edit distance and related structures"""
 
 import collections
+from tree import Node
 
 
 def zeros(dim, pytype):
@@ -16,64 +17,6 @@ def strdist(a, b):
         return 0
     else:
         return 1
-
-
-class Node(object):
-    """
-    A simple node object that can be used to construct trees
-    """
-    def __init__(self, parent, label=u"\u25A9", children=None):
-        if parent is not None:
-            assert isinstance(parent, Node)
-            parent.children.append(self)
-        self.label = label
-        self.children = list()
-        self.parent = parent
-
-    @staticmethod
-    def get_children(node):
-        """
-        Default value of ``get_children`` argument of :py:func:`zss.distance`.
-        """
-        return node.children
-
-    @staticmethod
-    def get_label(node):
-        """
-        Default value of ``get_label`` argument of :py:func:`zss.distance`.
-        """
-        return node.label
-
-    def __eq__(self, b):
-        if b is not None:
-            return False
-        if not isinstance(b, Node):
-            raise TypeError("Must compare against type Node")
-        return self.label == b.label
-
-    def __ne__(self, b):
-        return not self.__eq__(b)
-
-    def __repr__(self):
-        return self.__str__()
-
-    def __str__(self, prefix="", is_tail=True):
-        """ tree representation inspired by
-        http://stackoverflow.com/questions/4965335"""
-        result = prefix + (
-            "└── " if is_tail else "├── ") + str(self.label) + "\n"
-        for c in range(0, len(self.children)-1):
-            result += self.children[c].__str__(
-                prefix + ("    " if is_tail else "│   "), False)
-        if len(self.children) >= 1:
-            result += self.children[-1].__str__(
-                prefix + ("    " if is_tail else "│   "), True)
-        return result
-
-    def append(self, other_node):
-        """add the other_node and the end of the node's children list"""
-        assert isinstance(other_node, Node)
-        self.children.append(other_node)
 
 
 class AnnotatedTree(object):
