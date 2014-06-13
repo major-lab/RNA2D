@@ -1,27 +1,21 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
+"""tree edit distance and related structures"""
 
 import collections
 
-try:
-    import numpy as np
-    zeros = np.zeros
-except ImportError:
-    def py_zeros(dim, pytype):
-        assert len(dim) == 2
-        return [[pytype() for y in range(dim[1])]
-                for x in range(dim[0])]
-    zeros = py_zeros
 
-try:
-    from editdist import distance as strdist
-except ImportError:
-    def strdist(a, b):
-        if a == b:
-            return 0
-        else:
-            return 1
+def zeros(dim, pytype):
+    """simple matrix filled by zero"""
+    assert len(dim) == 2
+    return [[pytype() for y in range(dim[1])]
+            for x in range(dim[0])]
+
+
+def strdist(a, b):
+    """simple string equality distance"""
+    if a == b:
+        return 0
+    else:
+        return 1
 
 
 class Node(object):
@@ -77,6 +71,7 @@ class Node(object):
         return result
 
     def append(self, other_node):
+        """add the other_node and the end of the node's children list"""
         assert isinstance(other_node, Node)
         self.children.append(other_node)
 
