@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""parallel map """
+"""coarsed grain calculation of centrality at distance of THRESHOLD errors """
 from shapedistance import *
 from utility import *
+import pickle
 
 
 CHUNK_SIZE = 10  # size of process jobs
@@ -44,9 +45,11 @@ def calculate_centrality(positions, array, queue):
                 break
             if(unlabeled_distance(tree_1, tree_2) <= THRESHOLD):
                 result[-1] += qt
+    #with open("results/{0}.pk", "rb") as f:
+        #pickle.dump(result, f)
+    queue.put(list(zip(positions, result)))
     print("process at position {0} - {1} done".format(
           positions[0], positions[-1]))
-    queue.put(list(zip(positions, result)))
 
 
 if __name__ == '__main__':
@@ -56,14 +59,14 @@ if __name__ == '__main__':
     for (name, subopts) in data:
         allData += subopts
 
-    #allData = allData[1:1000]  # TODO change after confirmed it works
+    allData = allData[1:1000]  # TODO change after confirmed it works
     S = ShapeSet()
 
     # add the subopts and transform into trees
     # (annotated with the number of times it was seen)
     for subopt in allData:
         S.add(subopt)
-    print("number of abstract shapes = " + str(len(S)))
+
     # get back the array (dot_bracket, (tree, quantity))
     # organized by len(dot_bracket), increasing
     array = S.get_keys()
@@ -85,7 +88,6 @@ if __name__ == '__main__':
     results.sort(key=lambda x: x[1], reverse=True)
     dot_result = [(array[index][0], qt) for (index, qt) in results]
 
-    import pickle
 
     # pickle objects
     with open("result_pickle.pk", "wb") as f:
