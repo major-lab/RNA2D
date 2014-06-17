@@ -4,9 +4,9 @@ from shapedistance import *
 from utility import *
 
 
-CHUNK_SIZE = 50  # size of process jobs
-NPROC = 4  # amount of processors available
-THRESHOLD = 6  # amount of errors tolerated
+CHUNK_SIZE = 10  # size of process jobs
+NPROC = 20  # amount of processors available
+THRESHOLD = 5  # amount of errors tolerated
 SUBOPT_FILE = "result2.txt"  # input file
 
 
@@ -38,11 +38,11 @@ def calculate_centrality(positions, array, queue):
         for (dot_bracket, (tree_2, qt)) in array:
             # only break if at the upper end
             length_2 = len(dot_bracket)
-            #if(length_2 - length_1 < (-(THRESHOLD))):
-            #    continue
-            #elif(length_2 - length_1 < (THRESHOLD * 2)):
-            #    break
-            if(unlabeled_distance(tree_1, tree_2) < THRESHOLD):
+            if(length_2 - length_1 < (-(THRESHOLD))):
+                continue
+            if(length_2 - length_1 > (THRESHOLD * 2)):
+                break
+            if(unlabeled_distance(tree_1, tree_2) <= THRESHOLD):
                 result[-1] += qt
     print("process at position {0} - {1} done".format(
           positions[0], positions[-1]))
@@ -56,38 +56,37 @@ if __name__ == '__main__':
     for (name, subopts) in data:
         allData += subopts
 
-    allData = allData[1:10000]  # TODO change after confirmed it works
+    #allData = allData[1:1000]  # TODO change after confirmed it works
     S = ShapeSet()
 
     # add the subopts and transform into trees
     # (annotated with the number of times it was seen)
     for subopt in allData:
         S.add(subopt)
-    print("number of abstract shapes = "+str(len(S)))
+    print("number of abstract shapes = " + str(len(S)))
     # get back the array (dot_bracket, (tree, quantity))
     # organized by len(dot_bracket), increasing
     array = S.get_keys()
 
     # multiprocessing setup
-    result_queue = multiprocessing.Queue()
+    manager = multiprocessing.Manager()
+    result_queue = manager.Queue()
+    pool = multiprocessing.Pool(processes=NPROC)
     job_arrays = split_jobs(array)
-    jobs = [multiprocessing.Process(target=calculate_centrality,
-            args=(positions, array, result_queue)) for positions in job_arrays]
 
-    # start the processes
-    for job in jobs:
-        job.start()
-    for job in jobs:
-        job.join()
+    for positions in job_arrays:
+        pool.apply_async(calculate_centrality, (positions, array, result_queue,))
+
     results = []
-    for i in [result_queue.get() for _ in jobs]:
+    for i in [result_queue.get() for _ in job_arrays]:
         for j in i:
             results.append(j)
 
-    # store the results
-    #for (index, (dot_bracket, (_, qt))) in enumerate(S.get_keys()):
-    #    print(str(index) + " " + dot_bracket+ " " + str(qt))
-    #print(results)
     results.sort(key=lambda x: x[1], reverse=True)
-    for (index, qt) in results:
-        print(array[index][0]+ " " + str(qt))
+    dot_result = [(array[index][0], qt) for (index, qt) in results]
+
+    import pickle
+
+    # pickle objects
+    with open("result_pickle.pk", "wb") as f:
+        pickle.dump(dot_result, f)
