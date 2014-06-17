@@ -6,9 +6,9 @@ import pickle
 
 
 CHUNK_SIZE = 10  # size of process jobs
-NPROC = 20  # amount of processors available
+NPROC = 3  # amount of processors available
 THRESHOLD = 5  # amount of errors tolerated
-SUBOPT_FILE = "result2.txt"  # input file
+SUBOPT_FILE = "data.txt"  # input file
 
 
 # parallel part (pretty coarse grained)
@@ -59,7 +59,7 @@ if __name__ == '__main__':
     for (name, subopts) in data:
         allData += subopts
 
-    allData = allData[1:1000]  # TODO change after confirmed it works
+    allData = allData # TODO change after confirmed it works
     S = ShapeSet()
 
     # add the subopts and transform into trees
@@ -70,7 +70,7 @@ if __name__ == '__main__':
     # get back the array (dot_bracket, (tree, quantity))
     # organized by len(dot_bracket), increasing
     array = S.get_keys()
-
+    print(len(array))
     # multiprocessing setup
     manager = multiprocessing.Manager()
     result_queue = manager.Queue()
