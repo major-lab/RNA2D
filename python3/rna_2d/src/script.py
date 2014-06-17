@@ -39,7 +39,7 @@ def calculate_centrality(positions, array, queue):
         for (dot_bracket, (tree_2, qt)) in array:
             # only break if at the upper end
             length_2 = len(dot_bracket)
-            if(length_2 - length_1 < (-(THRESHOLD))):
+            if(length_2 - length_1 < (-THRESHOLD * 2)):
                 continue
             if(length_2 - length_1 > (THRESHOLD * 2)):
                 break
@@ -61,6 +61,7 @@ if __name__ == '__main__':
 
     allData = allData # TODO change after confirmed it works
     S = ShapeSet()
+    allData = allData[1:1000]
 
     # add the subopts and transform into trees
     # (annotated with the number of times it was seen)
@@ -90,5 +91,5 @@ if __name__ == '__main__':
 
 
     # pickle objects
-    with open("result_pickle.pk", "wb") as f:
+    with open("result_pickle2.pk", "wb") as f:
         pickle.dump(dot_result, f)
