@@ -39,7 +39,7 @@ class ShapeSet(object):
         keys = list(self.shapes.keys())
         keys.sort()
         keys.sort(key=len)  # will only work since the sort is stable
-        keys = [(k, self.shapes[k][1]) for k in keys]
+        keys = [(k, self.shapes[k]) for k in keys]  # (dotB, (Node, qt))
         return keys
 
     @staticmethod
