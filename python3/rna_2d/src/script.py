@@ -6,7 +6,7 @@ import pickle
 
 
 CHUNK_SIZE = 10  # size of process jobs
-NPROC = 3  # amount of processors available
+NPROC = 20  # amount of processors available
 THRESHOLD = 5  # amount of errors tolerated
 SUBOPT_FILE = "data.txt"  # input file
 
@@ -59,9 +59,7 @@ if __name__ == '__main__':
     for (name, subopts) in data:
         allData += subopts
 
-    allData = allData # TODO change after confirmed it works
     S = ShapeSet()
-    allData = allData[1:1000]
 
     # add the subopts and transform into trees
     # (annotated with the number of times it was seen)
@@ -93,3 +91,4 @@ if __name__ == '__main__':
     # pickle objects
     with open("result_pickle2.pk", "wb") as f:
         pickle.dump(dot_result, f)
+    print("finally done")
