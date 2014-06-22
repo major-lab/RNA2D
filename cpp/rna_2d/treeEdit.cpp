@@ -62,8 +62,7 @@ bool compare(struct shape_bracket a, struct shape_bracket b)
 
 
 class Node
-{
-    /*A simple node object that can be used to construct trees*/
+{   /*A simple node object that can be used to construct trees*/
     public:
         string label;
         vector<Node*> children;
@@ -114,7 +113,7 @@ class Node
 
 
 bool is_valid_dot_bracket(string dot_bracket)
-{/*returns wether or not the dot bracket is proper formed Vienna*/
+{    /*returns wether or not the dot bracket is proper formed Vienna*/
     int count = 0;
     for(int i = 0; i < dot_bracket.length(); i++)
     {
@@ -148,7 +147,7 @@ bool is_valid_dot_bracket(string dot_bracket)
 
 
 string only_paired_bracket(string dot_bracket)
-{/*removes unpaired symbol '.'*/
+{   /*removes unpaired symbol '.'*/
     vector<char> result;
     for(int i = 0; i < dot_bracket.size(); i++)
     {

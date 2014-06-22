@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ this script allows the displays of the results of 
 centrality search"""
 
