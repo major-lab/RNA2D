@@ -10,35 +10,6 @@
 
 using namespace std;
 
-// class Foo{
-// public:
-//     vector<int> V;
-//     void bar(){
-//         cout << "Hello" << endl;
-//     }
-//             void push(int x){
-//                 V.push_back(x);
-//             }
-//                     void print(){
-//                         for(int i=0; i<V.size(); i++)
-//                         {
-//                             cout << V[i] <<endl;
-//                         }
-//                     }
-//                             vector<int> get_v()
-//                             {
-//                                 return V;
-//                             }
-// };
-// 
-// extern "C" {
-//     Foo* Foo_new(){ return new Foo(); }
-//       void Foo_bar(Foo* foo){ foo->bar(); }
-//         void Foo_push(Foo* foo, int x){ foo->push(x); }
-//           void print(Foo* foo){foo->print();}
-//             vector<int> Foo_get_v(Foo* foo){foo->get_v();}
-// }
-
 
 struct shape_bracket
 {
@@ -63,11 +34,11 @@ bool compare(struct shape_bracket a, struct shape_bracket b)
 
 class Node
 {   /*A simple node object that can be used to construct trees*/
-    public:
+    private:
         string label;
         vector<Node*> children;
         Node* parent;
-
+    public:
         Node()
         {
             string label = "";

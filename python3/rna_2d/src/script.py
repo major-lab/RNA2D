@@ -51,44 +51,49 @@ def calculate_centrality(positions, array, queue):
     print("process at position {0} - {1} done".format(
           positions[0], positions[-1]))
 
-
-if __name__ == '__main__':
-    # fetch data
-    data = fastaRead(SUBOPT_FILE)
-    allData = []
-    for (name, subopts) in data:
-        allData += subopts
-
-    S = ShapeSet()
-
-    # add the subopts and transform into trees
-    # (annotated with the number of times it was seen)
-    for subopt in allData:
-        S.add(subopt)
-
-    # get back the array (dot_bracket, (tree, quantity))
-    # organized by len(dot_bracket), increasing
-    array = S.get_keys()
-    print(len(array))
-    # multiprocessing setup
-    manager = multiprocessing.Manager()
-    result_queue = manager.Queue()
-    pool = multiprocessing.Pool(processes=NPROC)
-    job_arrays = split_jobs(array)
-
-    for positions in job_arrays:
-        pool.apply_async(calculate_centrality, (positions, array, result_queue,))
-
-    results = []
-    for i in [result_queue.get() for _ in job_arrays]:
-        for j in i:
-            results.append(j)
-
-    results.sort(key=lambda x: x[1], reverse=True)
-    dot_result = [(array[index][0], qt) for (index, qt) in results]
+def get_summary(array_of_arrays):
+    """returns the summary of the suboptimals:
+       """
+    return
 
 
-    # pickle objects
-    with open("result_pickle2.pk", "wb") as f:
-        pickle.dump(dot_result, f)
-    print("finally done")
+#if __name__ == '__main__':
+    ## fetch data
+    #data = fastaRead(SUBOPT_FILE)
+    #allData = []
+    #for (name, subopts) in data:
+        #allData += subopts
+
+    #S = ShapeSet()
+
+    ## add the subopts and transform into trees
+    ## (annotated with the number of times it was seen)
+    #for subopt in allData:
+        #S.add(subopt)
+
+    ## get back the array (dot_bracket, (tree, quantity))
+    ## organized by len(dot_bracket), increasing
+    #array = S.get_keys()
+    #print(len(array))
+    ## multiprocessing setup
+    #manager = multiprocessing.Manager()
+    #result_queue = manager.Queue()
+    #pool = multiprocessing.Pool(processes=NPROC)
+    #job_arrays = split_jobs(array)
+
+    #for positions in job_arrays:
+        #pool.apply_async(calculate_centrality, (positions, array, result_queue,))
+
+    #results = []
+    #for i in [result_queue.get() for _ in job_arrays]:
+        #for j in i:
+            #results.append(j)
+
+    #results.sort(key=lambda x: x[1], reverse=True)
+    #dot_result = [(array[index][0], qt) for (index, qt) in results]
+
+
+    ## pickle objects
+    #with open("result_pickle2.pk", "wb") as f:
+        #pickle.dump(dot_result, f)
+    #print("finally done")
