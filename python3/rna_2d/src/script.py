@@ -51,12 +51,55 @@ def calculate_centrality(positions, array, queue):
     print("process at position {0} - {1} done".format(
           positions[0], positions[-1]))
 
-def get_summary(array_of_arrays):
-    """returns the summary of the suboptimals:
-       """
-    return
 
 
+def filter_dot_brackets(array_of_arrays):
+    """removes shapes that appear not in all lists of suboptimals"""
+    # create dict with best index for all shapes
+    shape_dicts = list()
+    for array in array_of_arrays:
+        shape_dicts.append(dict())
+        for (index, dot_bracket) in enumerate(array):
+            only_pairs = only_paired(dot_bracket)
+            shape_dicts[-1][only_pairs] = shape_dicts[-1].get(only_pairs, index)
+    for i in shape_dicts:
+        print(len(i))
+
+    # find the keys that belong in all dictionnaries
+    key_set = set(shape_dicts[0].keys())
+    for shape_dict in shape_dicts[1:]:
+        key_set = key_set.intersection(set(shape_dict.keys()))
+
+    # establish the ranking by simply making a sum of the indices
+    result_array = list()
+    for shape in key_set:
+        running_sum = 0
+        for shape_dict in shape_dicts:
+            running_sum += shape_dict[shape]
+        result_array.append((shape, running_sum))
+
+    # sort the result reverse order (the smallest sum is better)
+    result_array.sort(key=lambda x: x[1])
+
+    return ([shape_dict.keys() for shape_dict in shape_dicts], result_array)
+
+
+
+def key_intersect(dict_1, dict_2):
+    return set(dict_1.keys()).intersection(set(dict_2.keys()))
+
+
+# mode 1
+#if __name__ == '__main__':
+    ## fetch data
+    #data = fastaRead(SUBOPT_FILE)
+    #all_data = []
+    #for (name, subopts) in data:
+        #all_data.append(subopts)
+    #x = filter_dot_brackets(all_data)
+
+
+# mode 2
 #if __name__ == '__main__':
     ## fetch data
     #data = fastaRead(SUBOPT_FILE)
