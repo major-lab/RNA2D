@@ -1,13 +1,8 @@
-#include <string>
-#include <vector>
-#include <iostream>
-#include <cassert>
-#include <algorithm>
-
+#include "librna2d.h"
 
 
 bool is_valid_dot_bracket(std::string dot_bracket)
-{ // tests Vienna dot-bracket for illegal dot_bracket (or symbol)
+{   // tests Vienna dot-bracket for illegal dot_bracket (or symbol)
     int counter = 0;
 
     for (unsigned int i = 0; i < dot_bracket.size(); ++i)
@@ -42,7 +37,7 @@ bool is_valid_dot_bracket(std::string dot_bracket)
 
 
 std::string only_paired(std::string dot_bracket)
-{ // removes the "." characters from the dot_bracket
+{   // removes the "." characters from the dot_bracket
     assert (is_valid_dot_bracket(dot_bracket));  // only apply on legal dot_bracket
     std::string ret = std::string(dot_bracket);
     ret.erase(std::remove(ret.begin(), ret.end(), '.'), ret.end());
@@ -50,264 +45,239 @@ std::string only_paired(std::string dot_bracket)
 }
 
 
-struct Pair{
-    int opening;
-    int closing;
+class Node{
+public:
+    Node(char label, Node parent)
+    {
+        parent_ = parent;
+        label_ = label;
+        children_ = std::vector<Node>();
+    }
+    ~Node();
+
+    Node* parent_;
+    std::string label_;
+    std::vector<Node> children_;
+
 };
 
 
-
-struct Stem{
-    std::vector<int> opening;
-    std::vector<int> closing;
-    std::vector<Pair> pairs;
-};
-
-
-
-std::vector<Stem> getStems(std::string dot_bracket)
-{ // return the stems in the dot_bracket
-    assert (is_valid_dot_bracket((dot_bracket)));
-    std::vector<Stem> stems = std::vector<Stem>();
-    std::vector<int> openers = std::vector<int>();
-    std::vector<int> stem_starts = std::vector<int>();
-
-    int i = 0;
-    int length = dot_bracket.size();
-    Stem current_stem;
-    Pair base_pair;
-    int opener;
-    while (i < length)
+std::vector<Node*> dot_bracket_to_tree(std::string dot_bracket)
+{ // transform a dotbracket into a tree structure of P and U nodes
+    Node root = Node('r', NULL);
+    Node* position = &root;
+    char c;
+    for (size_t i = 0; i != dot_bracket.size(); ++i)
     {
-        // opening
-        if (dot_bracket[i] == '(')
+        c = dot_bracket[i];
+        if (c == '.')       // unpaired
         {
-            openers.push_back(i);
-            if (stems.empty())
-            {
-                stem_starts.push_back(i);
-            }
+            position->children.push_back(Node('U', position));
         }
-
-        // closing
-        else if (dot_bracket[i] == ')')
+        else if (c == '(')  // paired
         {
-            // initialize new stem
-            current_stem.opening = std::vector<int>();
-            current_stem.closing = std::vector<int>();
-            current_stem.pairs  = std::vector<Pair>();
-
-            while (i < length)
-            {
-                if (dot_bracket[i] == ')')
-                {
-                    // pop the opening position
-                    opener = openers.back();
-                    openers.pop_back();
-
-                    // create new base pair
-                    base_pair.opening = opener;
-                    base_pair.closing = i;
-
-                    // add to new stem
-                    current_stem.opening.push_back(opener);
-                    current_stem.closing.push_back(i);
-                    current_stem.pairs.push_back(base_pair);
-
-                    // check if the stem is completed (its opening position was added)
-                    if (std::find(stem_starts.begin(), stem_starts.end(), opener) == stem_starts.end())
-                    {
-                        break;
-                    }
-                }
-                else if (dot_bracket[i] == '(')
-                {
-                    stem_starts.push_back(i);
-                    i -= 1;
-                    break;
-                }
-                i += 1;
-            }
-            stems.push_back(current_stem);
+            position->children.push_back(Node('P', position));
+            position = position->children.back();
         }
-        i += 1;
+        else
+        {
+            position = position->parent;
+        }
     }
-    return stems;
+    return root.children;
 }
 
 
-std::vector<std::string> RNAshapes(std::string dot_bracket)
-{ // convert dot_bracket to RNA abstract shapes lvl 1, 3 and 5
-    std::vector<Stem> stems = get_stems(structure)
-
-    // build the level 1 for each stems
-    std::vector<int> range_occupied = std::vector<int>();
-    dict_lvl1 = dict()
-    Stem stem;
-    std::vector<int> range_open;
-    std::vector<int> range_close;
-    std::vector<int> range_occupied = std::vector<int>();
-
-    for (int j = 0; j != stems.size(); ++j)
+void print_helper(Node* position, std::vector<char>& symbol_list,
+                  char open_symbol, char close_symbol, char unpaired_symbol)
+{ //
+    Node children;
+    if (position->label_ == 'P')
     {
-        stem = stems[j];
-        range_open = std::vector<int>();
-        range_close = std::vector<int>();
-
-        for (int k = stem[0].back(); k != stem[0][0]+1; k++)
+        symbol_list.push_back(open_symbol);
+        for (size_t i = 0; i != position->children_.size(); ++i)
         {
-            range_open.push_back(k);
-            range_occupied.push_back(k);
+            children = position->children_[i];
+            print_helper(children, symbol_list, open_symbol, close_symbol, unpaired_symbol);
         }
-        for (int k = stem[1][0]; k!= stem[1].back(); k++)
-        {
-            range_close.push_back(k);
-            range_occupied.push_back(k);
-        }
-
-        // convert stems to level 1 abstract shape, for each stem
-        char c;
-
-        // OPENING
-        std::vector<char> opening = std::vector<char>();
-        for (int index = 0; index != range_open.size(); ++index)
-        {
-            c = structure[range_open[index]];
-
-            if (c == '(') && (opening.back() != '['))
-            {
-                opening.push_back('[');
-            }
-            else if ( (c == '.') && (opening.back() != '_') )
-            {
-                opening.push_back('_');
-
-        }
-
-        // CLOSING
-        std::vector<char> closing = std::vector<char>();
-        for (int index = 0; index != range_close.size(); ++index)
-        {
-            c = structure[range_close[index]];
-
-            if ( (c == ')') && (closing.back() != ']') )
-            {
-                closing.push_back(']');
-            }
-            else if ( (c == '.') && (closing.back() != '_'))
-            {
-                closing.push_back('_');
-            }
-        }
-
-        // rebalance the brackets
-        while (opening.count('[') < closing.count(']'))
-        {
-            opening.insert(0, '[');
-        }
-        while (opening.count('[') > closing.count(']'))
-        {
-            closing.push_back(']');
-        }
-
-        dict_lvl1[str(min(stem[0]))] = opening
-        dict_lvl1[str(min(stem[1]))] = closing
+        symbol_list.push_back(close_symbol);
     }
-
-    // assemble level 1
-    level_1 = " "
-    for i, element in enumerate(structure):
-        level_1 += dict_lvl1.get(str(i), '').strip()
-        if element == "." and level_1.back() != '_' and not i in range_occupied:
-            level_1 += '_'
-
-    level_1 = level_1.strip().replace("[_]", "[]")
-    level_1 = level_1.replace(" ", '')
-    level_1_str = std::string(level_1.begin(), level_1.end());
-
-    // from level 1, build level 3 (remove unpaired '_' symbols)
-    std::vector<char> level_3 = std::vector<char>();
-    for(int i = 0; i != level_1.size(); ++i)
+    else if (position->label_ =='U')
     {
-        if (level_1[i] != '_')
-        {
-            level_3.push_back(level_1[i]);
-        }
+        symbol_list.push_back(unpaired_symbol);
     }
-    std::string level_3_str = std::string(level_3.begin(), level_3.end());
-
-    // from level 3, build level 5 by removing nested stems
-    std::vector<char> level_5 = level_3;
-    while level_5.count("[[]]") > 0:
-        level_5 = level_5.replace("[[]]", "[]")
-
-    std::vector<std::string> result = {level_5_str, level_3_str, level_1_str};
-    return result;
+    return;
 }
 
 
-int main(int argc, char *argv[])
+std::string print_tree(std::vector<Node> trees, char open_symbol='(', char close_symbol=')', char unpaired_symbol='.')
+{ //
+    std::vector< std::vector<char> > str_reprs = std::vector< std::vector<char> >();
+    for (size_t i = 0; i != trees.size(); ++i)
+    {
+        std::vector<char> current = std::vector<char>();
+        print_helper()
+    }
+}
+
+def print_tree(trees, open_symbol='(', close_symbol=')', unpaired_symbol='.'):
+    """print the P-U node tree"""
+
+
+    str_reprs = []
+    for tree in trees:
+        cur = []
+        print_helper(tree, cur)
+        str_reprs.extend(cur)
+    return "".join(str_reprs)
+
+
+bool level1(Node* node)
+{   // to be used in a BFS traversal only
+    Node child;
+    if ( (node->label == 'P') && (node->children.size() == 1) )
+    {
+        child = node->children[0];
+        node->children = child.children;
+        child = NULL;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void BFS_apply(Node* subTree, bool(*fun)(Node*))
 {
-    std::string TEST = "(((..))..(.)..)";
-    std::cout << "testing " << TEST << std::endl;
-    std::vector<Stem> res = getStems(TEST);
-    for (size_t i = 0; i != res.size(); ++i)
+    std::queue<Node*> Q = std::queue<Node*>();
+    Q.enque(subTree);
+
+    bool modified;
+    Node* current_node;
+    while(Q.size() > 0)
     {
-        for(size_t j = 0; j != res[i].opening.size(); ++j)
+        current_node = Q.pop();
+        modified = (*fun)(current_node);
+        if (modified)
         {
-            std::cout << res[i].opening[j] << " " << res[i].closing[j] << std::endl;
+            Q.insert(0, current_node);
         }
-
-        std::cout << "end of stem " << i << std::endl;
+        else if (current_node->label_ == 'P')
+        {
+            for (size_t i = 0; i != current_node->children_.size(); ++i)
+            {
+                Q.push_back(current_node->children_[i]);
+            }
+        }
     }
-    return 1;
-
+    return;
 }
 
 
-std::string shape_level_5(std::string dot_bracket){
-    char db[dot_bracket.size()];
-    int dblen=0;
-    for( int i=0; i<dot_bracket.size(); ++i ){
-        if( dot_bracket[i]!='.' )
+std::string preprocess(std::string dot_bracket)
+{
+    // ... -> .
+    std::vector<char> step1 = std::vector<char>();
+    char currentChar;
+    char lastChar = NULL;
+    for (size_t i = 0; i != dot_bracket.size(); ++i)
+    {
+        currentChar = dot_bracket[i];
+        if ( (currentChar =='.') && (lastChar == currentChar))
         {
-            char c = dot_bracket[i];
-            c = c==')'?']':(c=='('?'[':c);
-            db[dblen++]=c;
+            // don't add
+            continue;
+        }
+        else
+        {
+            step1.push_back(currentChar);
+        }
+        lastChar = currentChar;
+    }
+
+    std::cout << dot_bracket << std::endl;
+    std::cout << std::string(step1.begin(), step1.end()) << std::endl;
+
+    // (.) -> ()
+    std::vector<char> step2 = std::vector<char>();
+    step2.push_back(step1[0]);
+
+    for(size_t i = 1; i != step1.size()-1; ++i)
+    {
+        if ( (step2.back() == '(') && (step1[i] == '.') && (step1[i+1] == ')') )
+        {
+            continue;
+        }
+        else
+        {
+            step2.push_back(step1[i]);
         }
     }
+    step2.push_back(step1.back());
 
-    //compute the idb (integer dot bracket) of the db
-    int buddies[dblen];
-    int stack[dblen];
-    int sp=-1;
-    int maxsp = -1; //needed to know if a db is only filled with '.'
-    for( int i=0;i<dblen;++i ){
-        if(db[i]=='['){
-            stack[++sp]=i;
-        } else if( db[i]==']' ){
-            buddies[i]=stack[sp];
-            buddies[stack[sp]]=i;
-            --sp;
-        }
-        maxsp = maxsp>sp?maxsp:sp;
-    }
-
-    int slen = 1; //1 and not 0 because if db[0] != '.' then there is no room for the first (
-    //1find length of shape
-    for( int i=1; i<dblen; ++i ){
-        if( ( buddies[i-1]-buddies[i]!=1 ) | ( db[i]!=db[i-1] ) ) ++slen;
-    }
-    // fill the shape
-    std::vector<char> shape = std::vector<char>(slen+1);
-
-    int next=0;
-    if(maxsp>-1)shape[next++]='[';
-    for( int i=1; i<dblen; ++i ){
-        if( ( ( buddies[i-1]-buddies[i]!=1 ) | ( db[i]!=db[i-1] ) ) )
-            shape[next++]=db[i];
-    }
-    std::string result = std::string(shape.begin(), shape.begin() + next); //shape[next]=0;
-    return result;
+    return std::string(step2.begin(), step2.end());
 }
+
+
+std::string RNAshapes(std::string dot_bracket, int level)
+{
+    assert(level == 1 || level == 3 || level==5);
+
+    // preprocess the dot bracket to remove useless patterns
+    std::string cleaned = preprocess(dot_bracket);
+    std::vector<Node*> trees = dot_bracket_to_tree(cleaned);
+
+    // apply level 1
+    Node* subtree;
+    for (size_t i = 0; i != trees.size(); ++i)
+    {
+        subtree = trees[i];
+        BFS_apply(subtree, (*level1));
+    }
+    std::string level1_str = print_tree(trees);
+    if (level == 1)
+    {
+        return level1_str;
+    }
+
+
+    std::vector<char> level3 = std::vector<char>();
+    for (size_t i = 0; i != level1_str.size(); ++i)
+    {
+        if (level1_str[i] != '_')
+        {
+            level3.push_back(level1_str);
+        }
+    }
+    std::string level3_str = std::string(level3.begin(), level3.end());
+    if (level == 3)
+    {
+        return level3_str;
+    }
+
+    //
+    std::vector<char> level5 = std::vector<char>();
+    for(size_t i = 0; i != level3_str.size(); ++i)
+    {
+        if (level3_str[i] == '[')
+        {
+            level5.push_back('(');
+        }
+        else if (level3_str[i] == ']')
+        {
+            level5.push_back(')');
+        }
+    }
+    trees = dot_bracket_to_tree(std::string(level5.begin(), level5.end()));
+    for (size_t i = 0; i != trees.size(); ++i)
+    {
+        subtree = trees[i];
+        BFS_walk(subtree, (*level1));
+    }
+    return print_tree(trees);
+}
+
+
+
 

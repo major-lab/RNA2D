@@ -93,10 +93,6 @@ def preprocess(dot_bracket):
     while db.count("(.)") > 0:
         db = db.replace("(.)", "()")
 
-    # (()) -> ()
-    while db.count("(())") > 0:
-        db = db.replace("(())", "()")
-
     return db
 
 
@@ -104,9 +100,8 @@ def RNAshapes(dot_bracket, level):
     """"the whole process wrapped"""
     assert level in [1, 3, 5]
 
-    # first, remove useless dots
+    # first, preprocess the dot bracket (removing common patterns)
     db = preprocess(dot_bracket)
-
     trees = dot_bracket_to_tree(db)
 
     # level 1
