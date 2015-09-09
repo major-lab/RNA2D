@@ -1,103 +1,173 @@
 """RNAshapes related functions"""
 
 
-def get_stems(structure):
-    """extract stems from the structure"""
-    stems = []
-    list_opener = []
-    print structure
-
-    i = 0
-    list_stem_start = []
-
-    # separate into stems
-    while i < len(structure):
-
-        if structure[i] == "(":
-            list_opener.append(i)
-            if not list_stem_start:
-                list_stem_start.append(i)
-        elif structure[i] == ")":
-            current_stem = [[], [], []]
-            while i < len(structure):
-                if structure[i] == ")":
-                    closer = list_opener.pop(-1)
-                    current_stem[0].append(closer)
-                    current_stem[1].append(i)
-                    current_stem[2].append((closer, i))
-                    if closer in list_stem_start:
-                        break
-                elif structure[i] == "(":
-                    list_stem_start.append(i)
-                    i -= 1
-                    break
-                i += 1
-            stems.append(current_stem)
-        i += 1
-    return stems
+class UNode(object):
+    def __init__(self, parent=None):
+        self.parent = parent
 
 
-def dot_bracket_to_abstract_shape(structure):
-    """Converts a Vienna dot-bracket structure into
-       its corresponding abstract shape as defined in RNAshapes.
-       Written by Stephen Leong Koan, IRIC, 2013"""
-    # the 3 levels we use are the following
-    # 1: Most accurate - all loops and all unpaired
-    # 3: Nesting pattern for all loop types but no unpaired regions
-    # 5: Most abstract - helix nesting pattern and no unpaired regions
+class PNode(object):
+    def __init__(self, parent=None):
+        self.parent = parent
+        self.children = []
 
-    stems = get_stems(structure)
 
-    # build the level 1 for each stems
-    range_occupied = []
-    dict_lvl1 = dict()
-    for stem in stems:
-        range_open = range(min(stem[0]), max(stem[0])+1)
-        range_close = range(min(stem[1]), max(stem[1])+1)
-        range_occupied.extend(range_open + range_close)
+def dot_bracket_to_tree(dot_bracket):
+    """ transform a dotbracket into a tree structure of P and U nodes"""
+    #assert is_valid_dot_bracket(dot_bracket)
+    root = PNode(None)
+    position = root
+    for char in dot_bracket:
+      if char == '.':    # unpaired
+          position.children.append(UNode(position))
+      elif char == '(':  # paired forward
+          position.children.append(PNode(position))
+          position = position.children[-1]
+      else:              # paired backward
+          position = position.parent
+    return root.children
 
-        temp_lvl1_open = " "
-        for i in range_open:
-            if structure[i] == "(" and temp_lvl1_open[-1] != "[":
-                temp_lvl1_open += "["
-            elif structure[i] == "." and temp_lvl1_open[-1] != "_":
-                temp_lvl1_open += "_"
 
-        temp_lvl1_close = " "
-        for i in range_close:
-            if structure[i] == ")" and temp_lvl1_close[-1] != "]":
-                temp_lvl1_close += "]"
-            elif structure[i] == "." and temp_lvl1_close[-1] != "_":
-                temp_lvl1_close += "_"
+def print_tree(trees, open_symbol='(', close_symbol=')', unpaired_symbol='.'):
+    """print the P-U node tree"""
+    def print_helper(position, symbol_list):
+        if isinstance(position, PNode):
+            symbol_list.append(open_symbol)
+            for children in position.children:
+                print_helper(children, symbol_list)
+            symbol_list.append(close_symbol)
+        elif isinstance(position, UNode):
+            symbol_list.append(unpaired_symbol)
+        return
 
-        while temp_lvl1_open.count("[") < temp_lvl1_close.count("]"):
-            temp_lvl1_open = "[" + temp_lvl1_open
+    str_reprs = []
+    for tree in trees:
+        cur = []
+        print_helper(tree, cur)
+        str_reprs.extend(cur)
+    return "".join(str_reprs)
 
-        while temp_lvl1_open.count("[") > temp_lvl1_close.count("]"):
-            temp_lvl1_close += "]"
 
-        dict_lvl1[str(min(stem[0]))] = temp_lvl1_open
-        dict_lvl1[str(min(stem[1]))] = temp_lvl1_close
+def level1(node):
+    """to be used in a BFS traversal only"""
+    # if node only has a single P child, remove self from the tree
+    if (isinstance(node, PNode) and len(node.children) == 1):
+        child = node.children[0]
+        node.children = child.children
+        child = None
+        return True
+    return False
 
-    # assemble level 1
-    level_1 = ""
-    for i, element in enumerate(structure):
-        level_1 += dict_lvl1.get(str(i), "").strip()
-        if element == "." and level_1[-1] != "_" and not i in range_occupied:
-            level_1 += "_"
 
-    print level_1
-    level_1 = level_1.replace("[_]", "[]")
+def BFS_apply(tree, function):
+    """BFS traversal application of the function"""
+    queue = [tree]
+    while len(queue) > 0:
+      # dequeue the node
+      current_node = queue.pop(0)
 
-    # from level 1, build level 3 (remove unpaired symbols)
-    level_3 = level_1.replace("_", "")
-    level_3 = level_3.replace(" ", "")
+      # work on the current node
+      modified = function(current_node)
+      if modified:
+          queue.insert(0, current_node)
+      elif isinstance(current_node, PNode):
+          for child in current_node.children:
+              queue.append(child)
+    return
 
-    # from level 3, build level 5 by removing stems with bulges
-    level_5 = level_3
-    while level_5.count("[[]]") > 0:
-        level_5 = level_5.replace("[[]]", "[]")
 
-    return (level_5, level_3, level_1)
+def preprocess(dot_bracket):
+    """ remove useless elements from the brackets using string functions"""
+    # ... -> .
+    processed = []
+    lastchar = None
+    for char in dot_bracket:
+        if char == '.' and lastchar == '.':
+            continue
+        else:
+            processed.append(char)
+        lastchar = char
+    db = "".join(processed)
 
+    # (.) -> ()
+    while db.count("(.)") > 0:
+        db = db.replace("(.)", "()")
+
+    # (()) -> ()
+    while db.count("(())") > 0:
+        db = db.replace("(())", "()")
+
+    return db
+
+
+def RNAshapes(dot_bracket, level):
+    """"the whole process wrapped"""
+    assert level in [1, 3, 5]
+
+    # first, remove useless dots
+    db = preprocess(dot_bracket)
+
+    trees = dot_bracket_to_tree(db)
+
+    # level 1
+    for tree in trees:
+        BFS_apply(tree, level1)
+    if level == 1:
+        return print_tree(trees, open_symbol='[', close_symbol=']', unpaired_symbol='_')
+
+    # level 3
+    # "_" -> ""
+    level3 = print_tree(trees, open_symbol='[', close_symbol=']', unpaired_symbol='_').replace("_", "")
+    if level == 3:
+        return level3
+
+    # level 5
+    # must remove nested stems (which were kept for level 3)
+    level5 = level3
+    level5 = level5.replace("[", "(").replace("]", ")")
+    trees = dot_bracket_to_tree(level5)
+    for tree in trees:
+        BFS_apply(tree, level1)
+    return print_tree(trees, open_symbol='[', close_symbol=']', unpaired_symbol='_')
+
+
+
+
+
+# TESTING
+
+
+import random
+import random_dot_bracket
+import subprocess
+import shlex
+
+
+def call_command(command, pipe=None, echo=False):
+    """simple shell call interface for python"""
+    if echo:
+        print command
+
+    process = subprocess.Popen(shlex.split(command.encode("ascii")),
+                               stdin=subprocess.PIPE,
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE)
+
+    output = process.communicate(input=pipe)
+    return output
+
+
+def test_random(n, levels=[1, 3, 5]):
+    """ checks that the result is the same as the one given by RNAshapes"""
+    errors = []
+    for level in levels:
+        for _ in range(n):
+            dot_bracket = random_dot_bracket.add_unpaired_ends(random_dot_bracket.generate_random_dot_bracket(10, random.randint(0, 5)))
+            command = "RNAshapes -D '{0}' -t {1}".format(dot_bracket, level)
+            result, warning = call_command(command)
+            result = result.strip()
+            python_version = RNAshapes(dot_bracket, level)
+            if python_version != result:
+                errors.append((level, dot_bracket, python_version, result))
+    return errors
 

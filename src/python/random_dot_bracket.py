@@ -4,6 +4,7 @@ import math
 import random
 from rna2d import is_valid_dot_bracket
 
+
 class _Node(object):
     """A simple node object that can be used to construct ordered trees"""
     def __init__(self, parent, label):
@@ -108,4 +109,12 @@ def generate_random_dot_bracket(length, num_base_pairs):
         tree.insert_random(node)
     return str(tree)
 
-__all__ = ["generate_random_dot_bracket"]
+
+def add_unpaired_ends(dot_bracket):
+    """ () -> (.)"""
+    while dot_bracket.count("()") > 0:
+        dot_bracket = dot_bracket.replace("()", "(.)")
+    return dot_bracket
+
+
+__all__ = ["generate_random_dot_bracket", "add_unpaired_ends"]
