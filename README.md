@@ -4,21 +4,16 @@
 
 ## Description
 
-Collection of 2D RNA scripts. A bit like Pycogent but with
-more exotic stuff.
+Collection of 2D RNA scripts.
 
 ## Languages used
 
 - python 2/3
 - C++
-- [julia 0.3](https://github.com/JuliaLang/julia)
 
 ## Contributing
 
 You think your code is interesting/useful/cool, just add it.
-Bug reports are very welcome (use the issue feature of github please).
-Please use documentation and examples.
-
 
 
 ## License
