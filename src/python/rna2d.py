@@ -1,35 +1,9 @@
-""" rna2d module holds functions to use for RNA 2D representation, comparison,
-and some generic operations"""
-
-
-
-class RNA2dStructure(object):
-    """2D structure representation of RNA
-    stores only information about base pairs in Vienna format"""
-    __slots__ = ['dot_bracket', 'energy', 'identification', 'seq']
-
-    def __init__(self,
-                 dot_bracket,
-                 energy=float("inf"),
-                 identification="",
-                 seq=""):
-        assert is_valid_dot_bracket(dot_bracket)
-        self.dot_bracket = dot_bracket
-        self.energy = energy
-        self.identification = identification
-        self.seq = is_valid_rna_sequence(seq)
-
-    def __str__(self):
-        return self.dot_bracket + "\n" + self.seq
-
-    def __repr__(self):
-        return self.__str__()
+""" RNA secondary structure related functions"""
 
 
 def only_paired(dot_bracket):
     """remove '.' character from dot_bracket"""
-    assert is_valid_dot_bracket(dot_bracket), "invalid dot-bracket"
-    return "".join([i for i in dot_bracket if i != '.'])
+    return dot_bracket.replace(".", "")
 
 
 def is_valid_rna_sequence(seq):
@@ -50,12 +24,12 @@ def is_valid_dot_bracket(dot_bracket):
             counter += 1
         elif i == ')':
             counter -= 1
-        elif i != '.':  # illegal symbol
+        elif i != '.':   # illegal symbol
             return False
         if counter < 0:  # unbalanced structure
             return False
     if counter != 0:
-        return False  # unbalanced structure
+        return False     # unbalanced structure
     return True
 
 
@@ -138,48 +112,3 @@ def to_bpseq(rna_sequence, dot_bracket):
     return "\n".join([str(x[0]) + " " + str(x[1]) +
                       " " + str(x[2]) for x in result[1:]])
 
-
-def get_stems(dot_bracket):
-    """gets the stems from the dot_bracket
-    ([opening], [closing], dict of pairs"""
-    assert is_valid_dot_bracket(dot_bracket), "invalid dot-bracket"
-    list_opener = []
-    stems = []
-    list_stem_end = []
-    i = 0
-    # separate into stems
-    while(i <= len(dot_bracket)-1):
-        # add to opening list
-        if(dot_bracket[i] == '('):
-            list_opener.append(i)
-        # find the closing in the opening list
-        elif(dot_bracket[i] == ')'):
-            stem = ([], [], dict())
-            while(i <= len(dot_bracket)-1):
-                if(dot_bracket[i] == ')'):
-                    opener = list_opener.pop()
-                    stem[0].append(opener)
-                    stem[1].append(i)
-                    stem[2][opener] = i
-                    if((not len(list_opener) == 0) and
-                       (list_opener[-1] in list_stem_end)):
-                        list_stem_end.append(list_opener[-1])
-                        break
-                elif(dot_bracket[i] == '('):
-                    if (not len(list_opener) == 0):
-                        list_stem_end.append(list_opener[-1])
-                    i -= 1
-                    break
-                i += 1
-            stems.append(stem)
-        i += 1
-        stems.sort(reverse=True)
-    return stems
-
-
-
-__all__ = ["RNA2dStructure",
-           "is_valid_rna_sequence",
-           "is_valid_dot_bracket",
-           "to_bpseq",
-           "get_stems"]
