@@ -1,6 +1,23 @@
 #include "librna2d.h"
 
 
+
+class Node{
+public:
+    Node(char label, Node* parent)
+    {
+        parent_ = parent;
+        label_ = label;
+        children_ = std::vector<Node>();
+    }
+    ~Node(){};
+
+    Node* parent_;
+    char label_;
+    std::vector<Node> children_;
+};
+
+
 bool is_valid_dot_bracket(std::string dot_bracket)
 {   // tests Vienna dot-bracket for illegal dot_bracket (or symbol)
     int counter = 0;
@@ -36,35 +53,9 @@ bool is_valid_dot_bracket(std::string dot_bracket)
 }
 
 
-std::string only_paired(std::string dot_bracket)
-{   // removes the "." characters from the dot_bracket
-    assert (is_valid_dot_bracket(dot_bracket));  // only apply on legal dot_bracket
-    std::string ret = std::string(dot_bracket);
-    ret.erase(std::remove(ret.begin(), ret.end(), '.'), ret.end());
-    return ret;
-}
-
-
-class Node{
-public:
-    Node(char label, Node parent)
-    {
-        parent_ = parent;
-        label_ = label;
-        children_ = std::vector<Node>();
-    }
-    ~Node();
-
-    Node* parent_;
-    std::string label_;
-    std::vector<Node> children_;
-
-};
-
-
-std::vector<Node*> dot_bracket_to_tree(std::string dot_bracket)
+std::vector<Node> dot_bracket_to_tree(std::string dot_bracket)
 { // transform a dotbracket into a tree structure of P and U nodes
-    Node root = Node('r', NULL);
+    Node root = Node('P', NULL);
     Node* position = &root;
     char c;
     for (size_t i = 0; i != dot_bracket.size(); ++i)
@@ -72,33 +63,31 @@ std::vector<Node*> dot_bracket_to_tree(std::string dot_bracket)
         c = dot_bracket[i];
         if (c == '.')       // unpaired
         {
-            position->children.push_back(Node('U', position));
+            position->children_.push_back(Node('U', position));
         }
         else if (c == '(')  // paired
         {
-            position->children.push_back(Node('P', position));
-            position = position->children.back();
+            position->children_.push_back(Node('P', position));
+            position = &(position->children_.back());
         }
         else
         {
-            position = position->parent;
+            position = position->parent_;
         }
     }
-    return root.children;
+    return root.children_;
 }
 
 
 void print_helper(Node* position, std::vector<char>& symbol_list,
                   char open_symbol, char close_symbol, char unpaired_symbol)
 { //
-    Node children;
     if (position->label_ == 'P')
     {
         symbol_list.push_back(open_symbol);
         for (size_t i = 0; i != position->children_.size(); ++i)
         {
-            children = position->children_[i];
-            print_helper(children, symbol_list, open_symbol, close_symbol, unpaired_symbol);
+            print_helper(&(position->children_[i]), symbol_list, open_symbol, close_symbol, unpaired_symbol);
         }
         symbol_list.push_back(close_symbol);
     }
@@ -110,36 +99,26 @@ void print_helper(Node* position, std::vector<char>& symbol_list,
 }
 
 
-std::string print_tree(std::vector<Node> trees, char open_symbol='(', char close_symbol=')', char unpaired_symbol='.')
+std::string print_tree(std::vector<Node> trees,
+                       char open_symbol='(',
+                       char close_symbol=')',
+                       char unpaired_symbol='.')
 { //
-    std::vector< std::vector<char> > str_reprs = std::vector< std::vector<char> >();
+    std::vector<char> chars = std::vector<char>();
     for (size_t i = 0; i != trees.size(); ++i)
     {
-        std::vector<char> current = std::vector<char>();
-        print_helper()
+        print_helper(&trees[i], chars, open_symbol, close_symbol, unpaired_symbol);
     }
+    return std::string(chars.begin(), chars.end());
 }
 
-def print_tree(trees, open_symbol='(', close_symbol=')', unpaired_symbol='.'):
-    """print the P-U node tree"""
 
 
-    str_reprs = []
-    for tree in trees:
-        cur = []
-        print_helper(tree, cur)
-        str_reprs.extend(cur)
-    return "".join(str_reprs)
-
-
-bool level1(Node* node)
+bool remove_stem(Node* node)
 {   // to be used in a BFS traversal only
-    Node child;
-    if ( (node->label == 'P') && (node->children.size() == 1) )
+    if ( (node->label_ == 'P') && (node->children_.size() == 1) )
     {
-        child = node->children[0];
-        node->children = child.children;
-        child = NULL;
+        node->children_ = node->children_[0].children_;
         return true;
     }
     else
@@ -148,26 +127,32 @@ bool level1(Node* node)
     }
 }
 
-void BFS_apply(Node* subTree, bool(*fun)(Node*))
+
+void remove_stems(Node* tree)
 {
-    std::queue<Node*> Q = std::queue<Node*>();
-    Q.enque(subTree);
+    std::deque<Node*> Q = std::deque<Node*>();
+    Q.push_back(tree);
+    Node* current_node;
 
     bool modified;
-    Node* current_node;
-    while(Q.size() > 0)
+    while(!Q.empty())
     {
-        current_node = Q.pop();
-        modified = (*fun)(current_node);
+        // dequeue
+        current_node = Q.front();
+        Q.pop_front();
+
+        // apply stem removing operation and check status
+        modified = remove_stem(current_node);
         if (modified)
         {
-            Q.insert(0, current_node);
+            // requeue immediately
+            Q.push_front(current_node);
         }
         else if (current_node->label_ == 'P')
         {
             for (size_t i = 0; i != current_node->children_.size(); ++i)
             {
-                Q.push_back(current_node->children_[i]);
+                Q.push_back(&(current_node->children_[i]));
             }
         }
     }
@@ -180,7 +165,7 @@ std::string preprocess(std::string dot_bracket)
     // ... -> .
     std::vector<char> step1 = std::vector<char>();
     char currentChar;
-    char lastChar = NULL;
+    char lastChar = 'a';
     for (size_t i = 0; i != dot_bracket.size(); ++i)
     {
         currentChar = dot_bracket[i];
@@ -195,9 +180,6 @@ std::string preprocess(std::string dot_bracket)
         }
         lastChar = currentChar;
     }
-
-    std::cout << dot_bracket << std::endl;
-    std::cout << std::string(step1.begin(), step1.end()) << std::endl;
 
     // (.) -> ()
     std::vector<char> step2 = std::vector<char>();
@@ -224,30 +206,32 @@ std::string RNAshapes(std::string dot_bracket, int level)
 {
     assert(level == 1 || level == 3 || level==5);
 
-    // preprocess the dot bracket to remove useless patterns
-    std::string cleaned = preprocess(dot_bracket);
-    std::vector<Node*> trees = dot_bracket_to_tree(cleaned);
+    // preprocess the dotbracket and convert it to tree representation
+    std::vector<Node> trees = dot_bracket_to_tree(preprocess(dot_bracket));
 
-    // apply level 1
-    Node* subtree;
+
+
+    //-------------------------------------------level 1
+    // must remove nodes with single children (stems without branching)
     for (size_t i = 0; i != trees.size(); ++i)
     {
-        subtree = trees[i];
-        BFS_apply(subtree, (*level1));
+        remove_stems(&(trees[i]));
     }
-    std::string level1_str = print_tree(trees);
+    std::string level1_str = print_tree(trees, '[', ']', '_');
     if (level == 1)
     {
         return level1_str;
     }
 
 
+    //-------------------------------------------level 3
+    // we use string replacement here, its easier
     std::vector<char> level3 = std::vector<char>();
     for (size_t i = 0; i != level1_str.size(); ++i)
     {
         if (level1_str[i] != '_')
         {
-            level3.push_back(level1_str);
+            level3.push_back(level1_str[i]);
         }
     }
     std::string level3_str = std::string(level3.begin(), level3.end());
@@ -256,7 +240,8 @@ std::string RNAshapes(std::string dot_bracket, int level)
         return level3_str;
     }
 
-    //
+    //-------------------------------------------level 5
+    // same as for level 1 except it is applied on the level 3 string
     std::vector<char> level5 = std::vector<char>();
     for(size_t i = 0; i != level3_str.size(); ++i)
     {
@@ -269,15 +254,21 @@ std::string RNAshapes(std::string dot_bracket, int level)
             level5.push_back(')');
         }
     }
-    trees = dot_bracket_to_tree(std::string(level5.begin(), level5.end()));
-    for (size_t i = 0; i != trees.size(); ++i)
+    std::vector<Node> trees2 = dot_bracket_to_tree(std::string(level5.begin(), level5.end()));
+    for (size_t i = 0; i != trees2.size(); ++i)
     {
-        subtree = trees[i];
-        BFS_walk(subtree, (*level1));
+        remove_stems(&(trees2[i]));
     }
-    return print_tree(trees);
+    return print_tree(trees2, '[', ']', '.');
 }
 
 
+int main()
+{
+    // testing various functions
 
+    std::cout << RNAshapes("(.(((..)).(.).))", 5) << std::endl;
+
+    return 0;
+}
 
