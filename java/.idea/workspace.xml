@@ -6,15 +6,9 @@
     </artifacts-to-build>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7b0169ea-c9db-458b-a380-c42afdb8961a" name="Default" comment="did minor refactoring to make most classes static">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/artifacts/java_jar.xml" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/util/RngStream.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/util/Util.java" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/util/WidthComparator.java" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/structure/AbstractShapes.java" afterPath="$PROJECT_DIR$/src/structure/AbstractShapes.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/structure/GranularTree.java" afterPath="$PROJECT_DIR$/src/structure/GranularTree.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/convenience/RNA2D.java" afterPath="$PROJECT_DIR$/src/convenience/RNA2D.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/verification/Verifier.java" afterPath="$PROJECT_DIR$/src/verification/Verifier.java" />
+    <list default="true" id="7b0169ea-c9db-458b-a380-c42afdb8961a" name="Default" comment="">
+      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/artifacts/java_jar.xml" afterPath="" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/.idea/artifacts/java_jar.xml" afterPath="$PROJECT_DIR$/.idea/artifacts/RNA2D_jar.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="rna2d.iws" />
@@ -86,8 +80,8 @@
       <file leaf-file-name="AbstractShapes.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/structure/AbstractShapes.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.28691274">
-              <caret line="14" column="2" selection-start-line="14" selection-start-column="2" selection-end-line="14" selection-end-column="2" />
+            <state vertical-scroll-proportion="0.6694631">
+              <caret line="26" column="0" selection-start-line="26" selection-start-column="0" selection-end-line="26" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -288,6 +282,42 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="convenience" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="rna2d" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="java" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="out" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="rna2d" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="java" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="out" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="artifacts" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="java_jar" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -566,7 +596,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="did minor refactoring to make most classes static" />
-    <option name="LAST_COMMIT_MESSAGE" value="did minor refactoring to make most classes static" />
+    <MESSAGE value="removed illegal characters from comments" />
+    <option name="LAST_COMMIT_MESSAGE" value="removed illegal characters from comments" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
@@ -649,8 +680,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/structure/AbstractShapes.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.28691274">
-          <caret line="14" column="2" selection-start-line="14" selection-start-column="2" selection-end-line="14" selection-end-column="2" />
+        <state vertical-scroll-proportion="0.6694631">
+          <caret line="26" column="0" selection-start-line="26" selection-start-column="0" selection-end-line="26" selection-end-column="0" />
           <folding />
         </state>
       </provider>
@@ -661,7 +692,7 @@
       <state key="ArtifactsStructureConfigurable.UI">
         <settings>
           <artifact-editor />
-          <last-edited>java:jar</last-edited>
+          <last-edited>RNA2D:jar</last-edited>
           <splitter-proportions>
             <option name="proportions">
               <list>

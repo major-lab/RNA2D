@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
-  <artifact type="jar" name="java:jar">
-    <output-path>$PROJECT_DIR$/out/artifacts/java_jar</output-path>
+  <artifact type="jar" name="RNA2D:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/RNA2D</output-path>
     <root id="archive" name="java.jar">
       <element id="module-output" name="java" />
     </root>
