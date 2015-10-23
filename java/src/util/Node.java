@@ -20,7 +20,7 @@ public class Node<T> {
      * @param parent parent of the node, can be null
      * @param label  label of the node, a char
      */
-    public Node(Node parent, T label) {
+    public Node(Node<T> parent, T label) {
         // constructor
         if (parent != null) {
             parent.getChildren().add(this);
