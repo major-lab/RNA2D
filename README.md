@@ -1,15 +1,10 @@
-# RNA 2D utilities
+# RNA 2D
 
-![](doc/figs/logo.jpg)
+![](doc/figs/rna2D.png)
 
 ## Description
 
-Collection of 2D RNA scripts.
-
-## Languages used
-
-- python 2/3
-- C++
+Collection of RNA secondary structure related utilities.
 
 ## Contributing
 
@@ -19,6 +14,5 @@ You think your code is interesting/useful/cool, just add it.
 ## License
 
 This repository is under CC0 1.0 Universal License, unless stated otherwise.
-If you disagree with that, [well, that's just, like, your opinion](https://www.youtube.com/watch?v=pWdd6_ZxX8c).
 
 
