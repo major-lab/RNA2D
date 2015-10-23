@@ -2,35 +2,34 @@ package structure;
 
 import util.Node;
 import util.OrderedRootedTree;
+import verification.Verifier;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 
 
-public class AbstractShapes{
+/**
+ * converts Vienna dot-bracket structures to Abstract Shapes representation
+ *
+ * currently only level 1-3-5 are implemented (2 and 4 might get done if needed)
+ *
+ * title = {Abstract shapes of RNA},
+ * volume = {32},
+ * number = {16},
+ * pages = {4843-4851},
+ * year = {2004},
+ * doi = {10.1093/nar/gkh779},
+ * journal = {Nucleic Acids Research}
+}
+ */
+public final class AbstractShapes{
 
-
-    private final String shape;
-
-
-    AbstractShapes(String dotBracket, int level)
-    {
-        assert (level == 1 || level == 3 || level == 5);
-        this.shape = dotBracketToAbstractShape(dotBracket, level);
-    }
-
-
-
-    @Override
-    public String toString()
-    {
-        return this.shape;
-    }
 
     /**
-     * remove the stems
-     * @param node
-     * @return
+     * remove stem nodes repetitions and convert to a single node instead e.g. ((())) -> ()
+     * @param node start of the stem
+     * @param nestingSymbol symbol used to represent nesting (usually '(')
+     * @return wether or not stem removal was applied
      */
     private static boolean removeStem(Node<Character> node, char nestingSymbol)
     {   // to be used in a BFS traversal only
@@ -59,28 +58,28 @@ public class AbstractShapes{
 
     public static void removeAllStems(Node<Character> tree, char nestingSymbol)
     {
-        ArrayDeque<Node> Q = new ArrayDeque<>();
+        ArrayDeque<Node<Character>> Q = new ArrayDeque<>();
         Q.addLast(tree);
-        Node<Character> current_node;
+        Node<Character> currentNode;
 
         boolean modified;
         while(!Q.isEmpty())
         {
-            // Dequeue
-            current_node = Q.pollFirst();
+            // dequeue
+            currentNode = Q.pollFirst();
 
             // apply stem removing operation and check status
-            modified = removeStem(current_node, nestingSymbol);
+            modified = removeStem(currentNode, nestingSymbol);
             if (modified)
             {
                 // requeue immediately
-                Q.addFirst(current_node);
+                Q.addFirst(currentNode);
             }
-            else if (current_node.getLabel() == nestingSymbol)
+            else if (currentNode.getLabel() == nestingSymbol)
             {
-                for (int i = 0; i != current_node.getChildren().size(); ++i)
+                for (int i = 0; i != currentNode.getChildren().size(); ++i)
                 {
-                    Q.addLast( current_node.getChildren().get(i));
+                    Q.addLast( currentNode.getChildren().get(i));
                 }
             }
         }
@@ -118,9 +117,20 @@ public class AbstractShapes{
         return charArrayListToString(step2);
     }
 
-    public static String dotBracketToAbstractShape(String dotBracket, int level)
+
+    public static String dotBracketToAbstractShape(String dotBracket, int level) throws IllegalArgumentException
     {
-        assert(level == 1 || level == 3 || level==5);
+        if (!Verifier.isValidRNA2DStructure(dotBracket))
+        {
+            throw new IllegalArgumentException("input RNA structure is problematic: " + dotBracket);
+        }
+
+        if (!(level == 1 || level == 3 || level==5))
+        {
+            throw new IllegalArgumentException("Conversion to abstract shape level " + level + " is not implemented (only 1, 3 and 5)");
+        }
+
+
 
         // preProcessDotBracket the dotbracket and convert it to tree representation
         String processed = preProcessDotBracket(dotBracket);
@@ -132,7 +142,7 @@ public class AbstractShapes{
 
         //-------------------------------------------level 1
         // must remove nodes with single children (stems without branching)
-        for (Node subRoot : subTrees)
+        for (Node<Character> subRoot : subTrees)
         {
             removeAllStems(subRoot, '(');
         }
@@ -152,11 +162,11 @@ public class AbstractShapes{
         }
 
         //-------------------------------------------level 5
-        // same as for level 1 except it is applied on the level 3 String
+        // same as for level 1 except it is applied on the level 3 string
         OrderedRootedTree tree2 = new OrderedRootedTree(level3, '[', ']', '_');
 
         ArrayList<Node<Character>> trees2 = tree2.getRoot().getChildren();
-        for (Node n : trees2)
+        for (Node<Character> n : trees2)
         {
             removeAllStems(n, '[');
         }

@@ -9,11 +9,12 @@ import java.util.ArrayList;
 public final class Verifier {
 
 
-    //region INPUT CHECKERS
+
     /**
-     * verifies that the arguments given to the constructor build a legal tree
+     * verifies that the arguments given to the constructor build a legit secondary
+     * structure in Vienna dot-bracket format
      * @param dotBracket string representation, usually Vienna dot bracket
-     * @return true if a valid tree is build from the arguments
+     * @return true if the string represents a legal structure in Vienna dot-bracket format
      */
     public static boolean isValidRNA2DStructure(String dotBracket)
     {
@@ -42,7 +43,7 @@ public final class Verifier {
 
 
     /**
-     * verifies if the RNA sequence given is composed of AUGC
+     * verifies if the RNA sequence given is composed of valid symbols only
      * @param sequence RNA sequence
      * @return true if it is a valid sequence of AUGC, false otherwise
      */
@@ -51,7 +52,7 @@ public final class Verifier {
         boolean isValid = true;
         for (char c : sequence.toUpperCase().toCharArray())
         {
-            if (!(c == 'A' || c =='U' || c == 'G' || c == 'C'))
+            if (!(validSymbols.contains(c)))
             {
                 isValid = false;
                 break;
@@ -59,5 +60,8 @@ public final class Verifier {
         }
         return isValid;
     }
-    //endregion
+
+
+
+
 }
