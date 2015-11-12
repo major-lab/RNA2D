@@ -1,10 +1,10 @@
-package verification;
+package core.verification;
 
 
 import java.util.ArrayList;
 
 /**
- * Holds verification functions for sequence, structure, file formats and such.
+ * Holds core.verification functions for sequence, structure, file formats and such.
  */
 public final class Verifier {
 

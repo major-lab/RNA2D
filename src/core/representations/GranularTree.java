@@ -1,8 +1,6 @@
-package structure;
+package core.representations;
 
-import util.Node;
-import util.OrderedRootedTree;
-import verification.Verifier;
+import core.verification.Verifier;
 
 import java.util.ArrayList;
 import java.util.LinkedList;

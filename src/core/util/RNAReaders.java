@@ -1,4 +1,4 @@
-package util;
+package core.util;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -41,8 +41,6 @@ public final class RNAReaders {
                     // read the new suboptimal
                     // must keep only the structure (first part)
                     subopts.add(line.substring(0, getSuboptLength(line)));
-                } else {
-                    continue;
                 }
             }
             // line is not visible here.

@@ -1,4 +1,4 @@
-package util;
+package core.representations;
 
 
 import java.util.ArrayList;
@@ -37,13 +37,13 @@ public class OrderedRootedTree {
         this.addNodeSymbol = addNodeSymbol;
 
         // create rooted tree (with artificial root)
-        artificialRoot = new Node(null, this.nestingSymbol);
+        artificialRoot = new Node<>(null, this.nestingSymbol);
         Node<Character> position = artificialRoot;
         int index = 0;
         for (char c : stringRepresentation_.toCharArray()) {
             if (c == this.nestingSymbol)       // create new node and position goes down
             {
-                position = new Node(position, this.nestingSymbol);
+                position = new Node<>(position, this.nestingSymbol);
                 position.setIndex(index);
                 index += 1;
             } else if (c == this.closingSymbol)  // position goes up
@@ -80,7 +80,7 @@ public class OrderedRootedTree {
 
     public String toString() {
         ArrayList<Character> symbolList = new ArrayList<>();
-        for (Node position : artificialRoot.getChildren()) {
+        for (Node<Character> position : artificialRoot.getChildren()) {
             getPostOrderLabels(position, symbolList);
         }
         StringBuilder builder = new StringBuilder(symbolList.size());

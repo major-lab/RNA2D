@@ -1,9 +1,9 @@
 package convenience;
 
 
-import structure.AbstractShapes;
-import structure.GranularTree;
-import verification.Verifier;
+import core.representations.AbstractShapes;
+import core.representations.GranularTree;
+import core.verification.Verifier;
 
 import java.util.ArrayList;
 
