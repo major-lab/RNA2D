@@ -1,9 +1,9 @@
-package convenience;
+package rna2d.convenience;
 
 
-import core.representations.AbstractShapes;
-import core.representations.GranularTree;
-import core.verification.Verifier;
+import rna2d.core.representations.AbstractShapes;
+import rna2d.core.representations.GranularTree;
+import rna2d.core.verification.Verifier;
 
 import java.util.ArrayList;
 

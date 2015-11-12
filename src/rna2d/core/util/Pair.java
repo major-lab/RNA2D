@@ -1,4 +1,4 @@
-package core.util;
+package rna2d.core.util;
 
 public class Pair<T1, T2>{
 

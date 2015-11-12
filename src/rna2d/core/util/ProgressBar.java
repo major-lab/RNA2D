@@ -1,4 +1,4 @@
-package core.util;
+package rna2d.core.util;
 
 public class ProgressBar {
     private String processName;

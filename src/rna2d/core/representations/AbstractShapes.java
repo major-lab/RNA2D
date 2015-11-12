@@ -1,6 +1,6 @@
-package core.representations;
+package rna2d.core.representations;
 
-import core.verification.Verifier;
+import rna2d.core.verification.Verifier;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;

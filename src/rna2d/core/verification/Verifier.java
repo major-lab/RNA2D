@@ -1,4 +1,4 @@
-package core.verification;
+package rna2d.core.verification;
 
 
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package core.util;
+package rna2d.core.util;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

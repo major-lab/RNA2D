@@ -1,4 +1,4 @@
-package core.representations;
+package rna2d.core.representations;
 
 
 import java.util.ArrayList;
