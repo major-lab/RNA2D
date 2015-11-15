@@ -7,19 +7,15 @@ import java.util.LinkedList;
 
 
 /**
- * Granular Tree representation of RNA secondary structure
- * =======================================================
- *
- *
+ * Granular Tree representation of RNA secondary structure*
  * Unpaired information is ignored (lost) and only base pairs are taken into account.
- *
  *
  * Basically the same as Shape level 5 but with stem length information conserved.
  * The encoding is variable. If the granularity is 1, then it corresponds to simply ignoring
  * unpaired nucleotides information. As the granularity grows, more and more information is lost
- * (each base pair represents the ceiling
+ * (each base pair represents a multiple of the granularity in terms of base pairs).
  *
- * Lossy tree compression ((((..)))).(.) -> (())() if granularity == 2
+ * e.g. ((((..)))).(.) -> (())() if granularity == 2
  */
 public final class GranularTree {
 
@@ -41,7 +37,15 @@ public final class GranularTree {
 
 
         // first convert the structure to a base pair tree (by removing the '.' symbol)
-        OrderedRootedTree basePairTree = new OrderedRootedTree(dotBracket.replace(".", ""), '(', ')', '.');
+        ArrayList<Character> stringRepresentation = new ArrayList<>();
+        for (Character c : dotBracket.toCharArray())
+        {
+            if (c != '.')
+            {
+                stringRepresentation.add(c);
+            }
+        }
+        OrderedRootedTree<Character> basePairTree = new OrderedRootedTree<>(stringRepresentation, '(', ')', '.');
 
 
         LinkedList<Node<Character>> searchSpace = new LinkedList<>();

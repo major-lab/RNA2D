@@ -5,9 +5,9 @@ public class ProgressBar {
     private int barLength;
     
     
-    public ProgressBar(String processName_, int bar_length_) {
+    public ProgressBar(String processName_, int barLength) {
         processName = processName_;
-        barLength = bar_length_;
+        this.barLength = barLength;
     }
 
 

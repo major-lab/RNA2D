@@ -4,10 +4,9 @@ package rna2d.core.verification;
 import java.util.ArrayList;
 
 /**
- * Holds core.verification functions for sequence, structure, file formats and such.
+ * Holds verification functions for sequence, structure, file formats and such.
  */
 public final class Verifier {
-
 
 
     /**

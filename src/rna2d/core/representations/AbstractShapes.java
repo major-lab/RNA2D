@@ -7,9 +7,8 @@ import java.util.ArrayList;
 
 
 /**
- * converts Vienna dot-bracket structures to Abstract Shapes representation
- *
- * currently only level 1-3-5 are implemented (2 and 4 might get done if needed)
+ * Converts Vienna dot-bracket structures to Abstract Shapes representation.
+ * Currently only level 1-3-5 are implemented (2 and 4 might get done if needed).
  *
  * title = {Abstract shapes of RNA},
  * volume = {32},
@@ -43,15 +42,6 @@ public final class AbstractShapes{
     }
 
 
-    private static String charArrayListToString(ArrayList<Character> input)
-    {
-        StringBuilder builder = new StringBuilder(input.size());
-        for (Character c  : input)
-        {
-            builder.append(c);
-        }
-        return builder.toString();
-    }
 
 
     public static void removeAllStems(Node<Character> tree, char nestingSymbol)
@@ -84,7 +74,7 @@ public final class AbstractShapes{
     }
 
 
-    public static String preProcessDotBracket(String dotBracket)
+    public static ArrayList<Character> preProcessDotBracket(String dotBracket)
     {
         ArrayList<Character> step1 = new ArrayList<>();
         char[] chars = dotBracket.toCharArray();
@@ -112,10 +102,17 @@ public final class AbstractShapes{
         }
         step2.add(step1.get(step1.size() - 1));
 
-        return charArrayListToString(step2);
+        return step2;
     }
 
 
+    /**
+     * The actual dotbracket -> abstract shape converter
+     * @param dotBracket input secondary structure
+     * @param level level of the shape wanted
+     * @return the shape of specified level for the secondary structure given
+     * @throws IllegalArgumentException, in case of badly formated secondary structure input
+     */
     public static String dotBracketToAbstractShape(String dotBracket, int level) throws IllegalArgumentException
     {
         if (!Verifier.isValidRNA2DStructure(dotBracket))
@@ -130,10 +127,10 @@ public final class AbstractShapes{
 
 
 
-        // preProcessDotBracket the dotbracket and convert it to tree representation
-        String processed = preProcessDotBracket(dotBracket);
+        // pre-process the dot-bracket and convert it to tree representation
+        ArrayList<Character> processed = preProcessDotBracket(dotBracket);
 
-        OrderedRootedTree tree = new OrderedRootedTree(processed, '(', ')', '.');
+        OrderedRootedTree<Character> tree = new OrderedRootedTree<>(processed, '(', ')', '.');
         ArrayList<Node<Character>> subTrees = tree.getRoot().getChildren();
 
 
@@ -152,16 +149,28 @@ public final class AbstractShapes{
 
 
         //-------------------------------------------level 3
-        // we use String replacement here, its easier
-        String level3 = level1.replace("_", "");
+        // remove the '_'
+        ArrayList<Character> level3 = new ArrayList<>();
+        for (Character c: level1.toCharArray())
+        {
+            if (c != '_')
+            {
+                level3.add(c);
+            }
+        }
         if (level == 3)
         {
-            return level3;
+            StringBuilder builder = new StringBuilder();
+            for (Character c: level3)
+            {
+                builder.append(c);
+            }
+            return builder.toString();
         }
 
         //-------------------------------------------level 5
         // same as for level 1 except it is applied on the level 3 string
-        OrderedRootedTree tree2 = new OrderedRootedTree(level3, '[', ']', '_');
+        OrderedRootedTree<Character> tree2 = new OrderedRootedTree<>(level3, '[', ']', '_');
 
         ArrayList<Node<Character>> trees2 = tree2.getRoot().getChildren();
         for (Node<Character> n : trees2)

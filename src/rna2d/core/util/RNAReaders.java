@@ -6,8 +6,17 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 
+/**
+ * Container of readers used for RNA input files format
+ */
 public final class RNAReaders {
 
+    /**
+     * figure out where the dot bracket ends on a given line
+     * usually formatted like (((..))) -1.2, with structure and energy
+     * @param line the line to extract the position from
+     * @return where the line should be cut to take only the dotbracket
+     */
     private static int getSuboptLength(String line) {
         char[] chars = line.toCharArray();
         int i = 0;
@@ -22,9 +31,14 @@ public final class RNAReaders {
     }
 
 
+    /**
+     * read marna file format with suboptimal structures
+     * we only take suboptimal structures as data, rest is ignored
+     * @param file input file path
+     * @return the many lists of suboptimal structures, no sequence, no energy
+     * @throws IOException
+     */
     public static ArrayList<ArrayList<String>> readMarnaFile(String file) throws IOException {
-        // read marna file format with suboptimal structures
-        // we only take suboptimal structures as data, rest is ignored
         ArrayList<ArrayList<String>> data = new ArrayList<>();
         ArrayList<String> subopts = new ArrayList<>();
 

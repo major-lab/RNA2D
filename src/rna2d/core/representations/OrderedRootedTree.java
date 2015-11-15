@@ -1,7 +1,9 @@
 package rna2d.core.representations;
 
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -9,88 +11,109 @@ import java.util.ArrayList;
  * and Vienna dot-bracket (planar ordered labeled tree)
  */
 
-public class OrderedRootedTree {
+public class OrderedRootedTree<T extends Comparable<T>> {
 
-    private Node<Character> artificialRoot;
-    private char nestingSymbol;
-    private char closingSymbol;
-    private char addNodeSymbol;
+    private Node<T> artificialRoot;
+
 
     /**
      * Constructor
      * Vienna dot bracket symbols =  ( ) .
      * Abstract shapes symbols = [ ] _
      *
-     * @param stringRepresentation_ representation of the tree
-     * @param nestingSymbol         symbol that causes nesting
-     * @param closingSymbol         symbol that corresponds to going up in the tree
-     * @param addNodeSymbol         symbol to add a node to the current node
+     * @param representation representation of the tree
+     * @param nestingSymbol  symbol that causes nesting
+     * @param closingSymbol  symbol that corresponds to going up in the tree
+     * @param addNodeSymbol  symbol to add a node to the current node
      */
-    public OrderedRootedTree(String stringRepresentation_,
-                             char nestingSymbol,
-                             char closingSymbol,
-                             char addNodeSymbol) {
+    public OrderedRootedTree(List<T> representation, T nestingSymbol, T closingSymbol, T addNodeSymbol) {
 
         // assign the string representation and remember the symbols
-        this.nestingSymbol = nestingSymbol;
-        this.closingSymbol = closingSymbol;
-        this.addNodeSymbol = addNodeSymbol;
-
         // create rooted tree (with artificial root)
-        artificialRoot = new Node<>(null, this.nestingSymbol);
-        Node<Character> position = artificialRoot;
+        artificialRoot = new Node<>(null, nestingSymbol);
+        Node<T> position = artificialRoot;
         int index = 0;
-        for (char c : stringRepresentation_.toCharArray()) {
-            if (c == this.nestingSymbol)       // create new node and position goes down
+        for (T c : representation) {
+            if (c == nestingSymbol)       // create new node and position goes down
             {
-                position = new Node<>(position, this.nestingSymbol);
+                position = new Node<>(position, nestingSymbol);
                 position.setIndex(index);
                 index += 1;
-            } else if (c == this.closingSymbol)  // position goes up
+            } else if (c == closingSymbol)  // position goes up
             {
                 position = position.getParent();
-            } else if (c == this.addNodeSymbol) // add unpaired node, position stays same
+            } else if (c == addNodeSymbol) // add unpaired node, position stays same
             {
-                new Node<>(position, this.addNodeSymbol);
+                new Node<>(position, addNodeSymbol);
                 position.setIndex(index);
                 index += 1;
             }
         }
+    }
+
+    public OrderedRootedTree(Node<T> artificialRoot)
+    {
+        this.artificialRoot = artificialRoot;
     }
 
 
     /**
      * recursively go through the tree by post-order and add the labels to the list of labels
      *
-     * @param position   node position in the tree being traversed
+     * @param position current node in the tree being traversed
      * @param labelsList list of the labels already traversed (to which labels are added)
      */
-    private void getPostOrderLabels(Node<Character> position, ArrayList<Character> labelsList) { //
-        if (position.getLabel() == nestingSymbol) {
-            labelsList.add(nestingSymbol);
-            for (Node<Character> newPosition : position.getChildren()) {
-                getPostOrderLabels(newPosition, labelsList);
-            }
-            labelsList.add(closingSymbol);
-        } else if (position.getLabel() == addNodeSymbol) {
-            labelsList.add(addNodeSymbol);
+    private void getPostOrderLabels(Node<T> position, ArrayList<T> labelsList) {
+
+        for(Node<T> child : position.getChildren())
+        {
+            getPostOrderLabels(child, labelsList);
         }
+        labelsList.add(position.getLabel());
     }
 
 
     public String toString() {
-        ArrayList<Character> symbolList = new ArrayList<>();
-        for (Node<Character> position : artificialRoot.getChildren()) {
+        ArrayList<T> symbolList = new ArrayList<>();
+        for (Node<T> position : artificialRoot.getChildren()) {
             getPostOrderLabels(position, symbolList);
         }
         StringBuilder builder = new StringBuilder(symbolList.size());
-        for (Character c : symbolList) {
+        for (T c : symbolList) {
             builder.append(c);
         }
         return builder.toString();
     }
 
-    public Node<Character> getRoot() {
+
+    public void changeLabels(T originalLabel, T replacementLabel)
+    {
+        ArrayDeque<Node<T>> Q = new ArrayDeque<>();
+        Q.addLast(artificialRoot);
+        Node<T> currentNode;
+
+        boolean modified;
+        while(!Q.isEmpty())
+        {
+            // dequeue
+            currentNode = Q.pollFirst();
+
+            // relabel if necessary
+            if (currentNode.getLabel().compareTo(originalLabel) == 0)
+            {
+                currentNode.setLabel(replacementLabel);
+            }
+
+            // enqueue the children of the current node
+            for (Node<T> child : currentNode.getChildren())
+            {
+                Q.addLast(child);
+            }
+        }
+    }
+
+
+    public Node<T> getRoot() {
         return artificialRoot;
     }
 }
