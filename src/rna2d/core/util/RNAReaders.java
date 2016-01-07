@@ -1,9 +1,8 @@
 package rna2d.core.util;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 
 /**
@@ -34,15 +33,14 @@ public final class RNAReaders {
     /**
      * read marna file format with suboptimal structures
      * we only take suboptimal structures as data, rest is ignored
-     * @param file input file path
+     * @param fileName input file path
      * @return the many lists of suboptimal structures, no sequence, no energy
-     * @throws IOException
      */
-    public static ArrayList<ArrayList<String>> readMarnaFile(String file) throws IOException {
+    public static ArrayList<ArrayList<String>> readMarnaFile(String fileName){
         ArrayList<ArrayList<String>> data = new ArrayList<>();
         ArrayList<String> subopts = new ArrayList<>();
 
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
             for (String line; (line = br.readLine()) != null; ) {
                 // process the line
 
@@ -62,8 +60,47 @@ public final class RNAReaders {
                 data.add(subopts);
             }
         }
+        catch (FileNotFoundException e) {
+            System.out.println("Could not find specified file (" + fileName + ")");
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
         return data;
     }
+
+
+        /**
+         * Read a distance matrix file into a matrix of double
+         *
+         * @param fileName file path of the distance matrix
+         * @return  distance matrix from the pointed fle
+         */
+        public static double[][] readDistanceMatrix(String fileName) {
+            double[][] distanceMatrix = null; // make it function local, outside of try-catch block
+
+            try {
+                File file = new File(fileName);
+                Scanner in = new Scanner(file);
+
+                int N = in.nextInt();
+                in.nextLine();
+                distanceMatrix = new double[N][N];
+                int x = 0;
+                int y;
+                while (in.hasNextLine()) {
+                    for (y = 0; y != N; ++y) {
+                        distanceMatrix[x][y] = in.nextDouble();
+                    }
+                    // go to the next row
+                    in.nextLine();
+                    x += 1;
+                }
+                in.close();
+            } catch (FileNotFoundException e) {
+                System.out.println("Could not find specified file (" + fileName + ")");
+            }
+            return distanceMatrix;
+        }
 }
 
 
