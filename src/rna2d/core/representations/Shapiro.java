@@ -1,17 +1,17 @@
 package rna2d.core.representations;
 
-import rna2d.core.util.Pair;
+import rna2d.core.datastructures.Node;
+import rna2d.core.datastructures.OrderedRootedTree;
 import rna2d.core.verification.Verifier;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Queue;
 import java.util.regex.Pattern;
 
-public class ShapiroTree {
+public class Shapiro {
     OrderedRootedTree<Character> tree;
 
-    ShapiroTree(String dotBracket)
+    Shapiro(String dotBracket)
     {
         assert Verifier.isValidRNA2DStructure(dotBracket);
         ArrayList<Character> characters = new ArrayList<>();

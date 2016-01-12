@@ -1,5 +1,7 @@
 package rna2d.core.representations;
 
+import rna2d.core.datastructures.Node;
+import rna2d.core.datastructures.OrderedRootedTree;
 import rna2d.core.verification.Verifier;
 
 import java.util.ArrayDeque;
@@ -10,14 +12,7 @@ import java.util.ArrayList;
  * Converts Vienna dot-bracket structures to Abstract Shapes representation.
  * Currently only level 1-3-5 are implemented (2 and 4 might get done if needed).
  *
- * title = {Abstract shapes of RNA},
- * volume = {32},
- * number = {16},
- * pages = {4843-4851},
- * year = {2004},
- * doi = {10.1093/nar/gkh779},
- * journal = {Nucleic Acids Research}
-}
+ * for review, please refer to "Abstract shapes of RNA, Nucleic Acids Research, 2004"
  */
 public final class AbstractShapes{
 

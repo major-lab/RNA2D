@@ -1,14 +1,17 @@
-package rna2d.core.util;
+package rna2d.core.io;
+
+import com.sun.xml.internal.ws.addressing.ProblemAction;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 
 /**
  * Container of readers used for RNA input files format
  */
-public final class RNAReaders {
+public final class Readers {
 
     /**
      * figure out where the dot bracket ends on a given line
@@ -67,40 +70,6 @@ public final class RNAReaders {
         }
         return data;
     }
-
-
-        /**
-         * Read a distance matrix file into a matrix of double
-         *
-         * @param fileName file path of the distance matrix
-         * @return  distance matrix from the pointed fle
-         */
-        public static double[][] readDistanceMatrix(String fileName) {
-            double[][] distanceMatrix = null; // make it function local, outside of try-catch block
-
-            try {
-                File file = new File(fileName);
-                Scanner in = new Scanner(file);
-
-                int N = in.nextInt();
-                in.nextLine();
-                distanceMatrix = new double[N][N];
-                int x = 0;
-                int y;
-                while (in.hasNextLine()) {
-                    for (y = 0; y != N; ++y) {
-                        distanceMatrix[x][y] = in.nextDouble();
-                    }
-                    // go to the next row
-                    in.nextLine();
-                    x += 1;
-                }
-                in.close();
-            } catch (FileNotFoundException e) {
-                System.out.println("Could not find specified file (" + fileName + ")");
-            }
-            return distanceMatrix;
-        }
 }
 
 

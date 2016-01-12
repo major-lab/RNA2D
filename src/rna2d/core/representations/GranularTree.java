@@ -1,5 +1,7 @@
 package rna2d.core.representations;
 
+import rna2d.core.datastructures.Node;
+import rna2d.core.datastructures.OrderedRootedTree;
 import rna2d.core.verification.Verifier;
 
 import java.util.ArrayList;
